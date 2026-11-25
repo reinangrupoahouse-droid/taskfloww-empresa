@@ -1,0 +1,579 @@
+import { canManageMarketingAccess } from "./environment-access";
+
+export type UpdateWorkspace = "marketing" | "consultoria";
+export type UpdatePreviewKind =
+  | "empresa-black"
+  | "mobile-tasks-push"
+  | "maintenance"
+  | "subtask-enter-next-row"
+  | "subtask-save-returns-to-task"
+  | "task-save-performance"
+  | "task-read-performance"
+  | "complete-task-lists"
+  | "shared-task-session"
+  | "clean-text-paste"
+  | "whatsapp-conversation-windows"
+  | "task-period-and-view"
+  | "marketing-two-clients-and-task-link"
+  | "task-card-readable-title"
+  | "mural-activity-actor"
+  | "marketing-team-production"
+  | "task-list-quick-actions"
+  | "consultoria-owner-task-panel"
+  | "marketing-create-side-panel"
+  | "marketing-inline-task-images"
+  | "meeting-agenda-tasks"
+  | "subtask-attachment-indicator"
+  | "subtask-file-thumbnails"
+  | "subtask-dragged-images"
+  | "automatic-safe-update"
+  | "subtask-pasted-prints"
+  | "client-calendar-references"
+  | "agenda-google-compact-actions"
+  | "agenda-google-connection-layout"
+  | "reports-period-layout"
+  | "mobile-client-cards"
+  | "dashboard-mobile-metrics"
+  | "mobile-obligations-metrics"
+  | "mobile-task-toolbar"
+  | "dashboard-filter-panel"
+  | "team-distribution-labels"
+  | "compact-environments-mobile"
+  | "animated-sidebar"
+  | "recent-update-history"
+  | "sidebar-control-footer"
+  | "mobile-layout"
+  | "meeting-delete-history"
+  | "collaborator-sync"
+  | "client-important-dates"
+  | "member-team-dashboard"
+  | "report-subtask-metrics"
+  | "meeting-empty-close"
+  | "meeting-auto-complete"
+  | "permission-save"
+  | "permission-nav-order"
+  | "crm-avatar-aligned"
+  | "crm-without-contact"
+  | "crm-company-labels"
+  | "crm-company"
+  | "crm-columns"
+  | "crm-pipeline"
+  | "subtask-participation"
+  | "calendar-subtask-dates"
+  | "update-one-click"
+  | "update-retry"
+  | "assignment-popup-read"
+  | "update-shortcut"
+  | "calendar-subtasks"
+  | "update-flow"
+  | "task-card-activity"
+  | "task-edit"
+  | "calendar-reschedule"
+  | "links-calendar"
+  | "task-prints"
+  | "dashboard";
+export type AppUpdate = {
+  id: string;
+  title: string;
+  date: string;
+  preview: UpdatePreviewKind;
+  audience: "all" | "admin" | "owner";
+  workspaces: readonly UpdateWorkspace[];
+  details: readonly string[];
+  /** Mudança só do celular: não aparece nem é anunciada no computador. */
+  devices?: readonly "mobile"[];
+};
+
+// Keep newest first. The first visible entry determines the update notice and
+// acknowledgement key, so a release is registered once, not in several screens.
+export const APP_UPDATES: readonly AppUpdate[] = [
+  {
+    id: "taskfloww-empresa-preto-2026-11-25",
+    title: "Taskfloww Empresa com visual preto",
+    date: "2026-11-25",
+    preview: "empresa-black",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Tema preto como padrão, com painéis em grafite, textos claros e destaques neutros no computador e no celular.",
+      "A preferência de tema desta cópia é salva separadamente. O botão de modo claro continua disponível.",
+    ],
+  },
+  {
+    id: "tarefas-no-celular-2026-11-24",
+    title: "Minhas Tarefas mais fácil no celular",
+    date: "2026-11-24",
+    preview: "mobile-tasks-push",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    devices: ["mobile"],
+    details: [
+      "Lista em cartões agrupados por prazo: Atrasadas, Hoje, Amanhã, Esta semana e Depois. Toque na bolinha para concluir.",
+      "Kanban com uma coluna por vez: deslize para o lado ou toque nas abas. O menu ⋯ move a tarefa de coluna.",
+      "Calendário dia a dia: escolha o dia na faixa da semana e veja as tarefas dele.",
+      "Botão + para criar tarefa rápido com título, cliente, responsável e prazo. Mais detalhes abre o formulário completo.",
+      "No computador nada muda.",
+    ],
+  },
+  {
+    id: "manutencao-2026-11-24",
+    title: "Correção de bugs e erros",
+    date: "2026-11-24",
+    preview: "maintenance",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: ["Correção de bugs e erros."],
+  },
+  {
+    id: "enter-cria-a-proxima-subtarefa-2026-11-23",
+    title: "Enter volta a criar a próxima subtarefa",
+    date: "2026-11-23",
+    preview: "subtask-enter-next-row",
+    audience: "all",
+    workspaces: ["marketing"],
+    details: [
+      "Ao digitar o nome de uma subtarefa nova, Enter (ou OK no teclado do celular) confirma o nome e já abre a próxima subtarefa, como era antes.",
+      "Com o nome em branco, Enter não cria outra linha. Esc remove a linha vazia.",
+      "O botão Adicionar subtarefa continua funcionando normalmente.",
+    ],
+  },
+  {
+    id: "subtarefa-salvar-e-voltar-para-a-tarefa-2026-11-19",
+    title: "Subtarefas novas: salvar e voltar para a tarefa",
+    date: "2026-11-19",
+    preview: "subtask-save-returns-to-task",
+    audience: "all",
+    workspaces: ["marketing"],
+    details: [
+      "Nos detalhes de uma subtarefa nova, Salvar e sair agora guarda a tarefa e a subtarefa e volta para a tarefa, em vez de fechar tudo e voltar para Minhas Tarefas.",
+      "A tarefa continua aberta para novas edições. Um novo salvamento não pede outra vez a justificativa de um prazo que já foi salvo.",
+      "Ao digitar o nome de uma subtarefa nova, Enter apenas confirma o nome. Outra subtarefa só é criada pelo botão Adicionar subtarefa.",
+      "O botão Salvar da tarefa continua fechando a janela depois de salvar, como antes.",
+    ],
+  },
+  {
+    id: "salvar-tarefas-com-menos-espera-2026-11-18",
+    title: "Salvar tarefas com menos espera",
+    date: "2026-11-18",
+    preview: "task-save-performance",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Ao salvar, a janela fecha depois que as gravações e os arquivos são confirmados. A atualização das listas acontece em segundo plano, sem prolongar a espera no formulário.",
+      "Colaboradores não alterados dispensam uma consulta adicional. Alterações nessa seleção continuam sendo conferidas com os vínculos atuais para preservar inclusões feitas por outras pessoas.",
+      "No Marketing, as subtarefas novas são enviadas juntas. Se houver falha de gravação ou upload, o formulário continua aberto para corrigir ou tentar novamente.",
+    ],
+  },
+  {
+    id: "carregamento-de-tarefas-mais-leve-2026-11-18",
+    title: "Carregamento de tarefas mais leve",
+    date: "2026-11-18",
+    preview: "task-read-performance",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Tarefas e subtarefas continuam sendo carregadas por completo, com menos consultas repetidas e sem contar toda a lista a cada página.",
+      "Os cards compartilham a leitura de subtarefas, etiquetas e comentários. As mudanças continuam chegando em tempo real, com atualização de segurança ao voltar para a aba ou reconectar.",
+      "As verificações de acesso das subtarefas e dos colaboradores são calculadas em conjunto. As permissões de leitura, edição e exclusão permanecem as mesmas.",
+    ],
+  },
+  {
+    id: "tarefas-completas-e-acessos-2026-11-16",
+    title: "Tarefas não somem mais da lista",
+    date: "2026-11-16",
+    preview: "complete-task-lists",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Em ambientes com muitas tarefas, parte delas podia sumir por alguns instantes e voltar depois ou ao atualizar a página. Agora tarefas, subtarefas, colaboradores, conversas e alterações de prazo são carregados por completo.",
+      "Mover um card, editar uma coluna, um post do Mural, um cliente ou uma etiqueta aparece na tela na hora, sem esperar a resposta do servidor.",
+      "Na Lista, o botão de excluir aparece só para quem criou a tarefa ou para administradores. Se uma exclusão feita sem internet for recusada pelo servidor, a tarefa volta para a lista com o motivo.",
+      "Tarefas criadas sem internet mantêm formato, objetivo, outros clientes e o vínculo com a pauta da reunião ao sincronizar.",
+      "Páginas abertas por um link ou endereço direto respeitam as mesmas permissões do menu. As tarefas criadas por Importar Ata ficam no ambiente em uso e só podem ser atribuídas a pessoas desse ambiente.",
+    ],
+  },
+  {
+    id: "sessao-ao-abrir-links-de-tarefas-2026-11-11",
+    title: "Links de tarefas reconhecem sua sessão",
+    date: "2026-11-11",
+    preview: "shared-task-session",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Ao abrir um link de tarefa no mesmo navegador, o TaskFlow procura uma sessão já aberta no endereço com ou sem www e continua por esse endereço, preservando o destino da tarefa.",
+      "Quando for necessário entrar, o link continua guardado até o login. As mensagens de acesso foram traduzidas e o campo de entrada aceita senhas já cadastradas, mantendo a validação do servidor.",
+      "Um navegador diferente ou o navegador interno de outro aplicativo pode exigir login, pois possui uma sessão separada.",
+    ],
+  },
+  {
+    id: "colagem-de-texto-sem-codigos-2026-11-10",
+    title: "Texto colado sem códigos <span>",
+    date: "2026-11-10",
+    preview: "clean-text-paste",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Textos copiados do ChatGPT e de outras ferramentas que chegavam com códigos como <span> agora entram limpos, mantendo as quebras de linha.",
+      "Vale para descrições de tarefas e subtarefas, títulos, comentários, conversas, anotações e os demais campos de texto. Textos comuns continuam exatamente como foram copiados.",
+    ],
+  },
+  {
+    id: "whatsapp-varias-conversas-2026-11-10",
+    title: "Várias conversas abertas no WhatsApp",
+    date: "2026-11-10",
+    preview: "whatsapp-conversation-windows",
+    audience: "owner",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "No Kanban do WhatsApp, cada conversa abre em uma janela ao lado das outras, e o quadro continua disponível para abrir mais. Você responde em qualquer uma delas.",
+      "Minimize uma janela para guardá-la como uma bolinha com a foto e o número de mensagens não lidas. Amplie quando precisar de mais espaço. As conversas abertas voltam como estavam ao reabrir o chat neste navegador.",
+      "As conversas ganharam as cores do WhatsApp Business: fundo Clássico com desenhos, balões verdes com ponta, campo de mensagem e modo escuro no mesmo estilo. Os outros fundos continuam no seletor de fundo da conversa.",
+    ],
+  },
+  {
+    id: "tarefas-por-periodo-e-ultima-visao-2026-10-30",
+    title: "Tarefas por semana ou mês",
+    date: "2026-10-30",
+    preview: "task-period-and-view",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Lista e Kanban mostram atalhos para tarefas com prazo hoje, nesta semana ou neste mês. Na Lista, a seção Concluídas mostra apenas o que foi finalizado hoje.",
+      "A última visualização escolhida, Lista, Kanban ou Calendário, volta a abrir neste navegador ao entrar em Minhas Tarefas.",
+    ],
+  },
+  {
+    id: "marketing-dois-clientes-e-link-da-tarefa-2026-10-30",
+    title: "Uma tarefa em vários clientes no Marketing",
+    date: "2026-10-30",
+    preview: "marketing-two-clients-and-task-link",
+    audience: "all",
+    workspaces: ["marketing"],
+    details: [
+      "Vincule quantos clientes de Marketing forem necessários ao mesmo card. Responsável, colaboradores, subtarefas e conversa continuam compartilhados; os colaboradores recebem avisos dos comentários.",
+      "Copie o link no painel da tarefa para enviá-lo a quem já tem acesso ao Marketing e à tarefa. O destinatário abre o card direto, inclusive após fazer login ou trocar do ambiente Consultoria para Marketing.",
+      "No cabeçalho de uma tarefa nova, Copiar link e Fixar prioridade mostram que ficam disponíveis após salvar.",
+    ],
+  },
+  {
+    id: "titulos-legiveis-nos-cards-de-tarefas-2026-10-30",
+    title: "Títulos mais legíveis nos cards de tarefas",
+    date: "2026-10-30",
+    preview: "task-card-readable-title",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Pin, título e fotos dos participantes ficam na mesma linha no topo do card. O título continua pelas linhas seguintes sem ficar comprimido pelos controles; editar, concluir e duplicar ficam no menu de três pontos.",
+    ],
+  },
+  {
+    id: "autor-correto-nos-avisos-do-mural-2026-10-29",
+    title: "Quem alterou o mural aparece nos avisos",
+    date: "2026-10-29",
+    preview: "mural-activity-actor",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Os avisos inferiores e o resumo ao reabrir o sistema identificam quem realmente alterou o post-it. Fixar e desfixar mostram a ação com o nome dessa pessoa, sem atribuir a alteração ao criador do recado.",
+      "Você não recebe esse aviso de atividade pela sua própria ação. Mover o post-it no quadro continua silencioso; fixar e desfixar continuam sem gerar uma notificação persistente.",
+    ],
+  },
+  {
+    id: "producao-e-historico-da-equipe-marketing-2026-10-26",
+    title: "Produção pessoal e histórico da equipe no Marketing",
+    date: "2026-10-26",
+    preview: "marketing-team-production",
+    audience: "all",
+    workspaces: ["marketing"],
+    details: [
+      "Minha produção mostra as tarefas diretamente atribuídas e as que ainda têm subtarefas suas em aberto. Concluir a última subtarefa retira o card dessa fila, sem concluir a tarefa principal de outra pessoa.",
+      "No Marketing, colaboradores e administradores têm Minha produção como visão inicial. Em Todas e na Lista, podem consultar as tarefas da equipe, inclusive concluídas. O histórico pessoal mantém suas subtarefas entregues; o Kanban oferece Todo o histórico para consultar concluídas antigas.",
+      "A conversa de tarefas da equipe pode ser consultada sem trocar colaboradores. Novas atribuições e alterações passam a ser atualizadas automaticamente no quadro, com uma nova consulta periódica caso a conexão em tempo real seja interrompida.",
+    ],
+  },
+  {
+    id: "painel-de-tarefas-consultoria-reinan-2026-10-22",
+    title: "Novo painel de tarefas na Consultoria",
+    date: "2026-10-22",
+    preview: "consultoria-owner-task-panel",
+    audience: "owner",
+    workspaces: ["consultoria"],
+    details: [
+      "Na sua conta, a Consultoria passa a usar o mesmo painel lateral de criação e edição de tarefas do Marketing, no Kanban, na Lista e no Calendário.",
+      "Você também pode criar pelo dia do calendário, abrir uma subtarefa em seu próprio painel e posicionar prints na descrição. Os anexos continuam disponíveis em Arquivos.",
+      "As outras contas da Consultoria continuam com a interface anterior; a Lista e a correção dos prints das subtarefas permanecem disponíveis para todos.",
+    ],
+  },
+  {
+    id: "lista-com-status-e-lixeira-2026-10-22",
+    title: "Lista de tarefas mais prática",
+    date: "2026-10-22",
+    preview: "task-list-quick-actions",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "No Marketing e na Consultoria, a Lista mostra o status com a cor da coluna e permite mudá-lo ali mesmo. A conclusão continua com o botão próprio e sua confirmação de data quando necessária.",
+      "A lixeira aparece em cada linha para mover a tarefa sem abrir o card, após confirmação. Busca, filtros e Nova tarefa ocupam menos espaço no topo da Lista.",
+      "Prints anexados às subtarefas são preservados ao salvar e reabrir os detalhes.",
+    ],
+  },
+  {
+    id: "painel-lateral-de-criacao-marketing-2026-10-22",
+    title: "Painel lateral de tarefas",
+    date: "2026-10-22",
+    preview: "marketing-create-side-panel",
+    audience: "all",
+    workspaces: ["marketing"],
+    details: [
+      "No Marketing, criar e reabrir tarefas pelo Kanban, Lista ou Calendário usa o mesmo painel lateral. No calendário, clique no dia, digite o título e pressione Enter: o card aparece imediatamente enquanto é salvo e depois abre no painel. O fundo permanece claro e clicar fora retorna à visualização.",
+      "Responsável, prazo e cliente ficam logo no início; prioridade, formato, objetivo, status e colaboradores ficam em Mais campos. A atribuição, os colaboradores e a conversa seguem ligados à tarefa salva.",
+      "Clique no nome de uma subtarefa para abrir seus detalhes em outro painel lateral. Texto e prints ocupam a posição escolhida na descrição; Anexar arquivo aceita documentos, vídeos e imagens separadas. Tudo fica em Arquivos, com download disponível.",
+      "No calendário, tarefas e subtarefas têm cartões arredondados da mesma altura, inclusive com títulos de duas linhas. As cores dos clientes ficam mais vivas; cards sem cliente ficam vazios e tracejados até que um cliente seja salvo. Ao passar o mouse, o círculo de conclusão fica verde e aparece uma dica, sem deslocar o texto.",
+    ],
+  },
+  {
+    id: "prints-na-descricao-das-tarefas-marketing-2026-10-22",
+    title: "Prints no texto das tarefas",
+    date: "2026-10-22",
+    preview: "marketing-inline-task-images",
+    audience: "all",
+    workspaces: ["marketing"],
+    details: [
+      "Cole, arraste ou selecione imagens no ponto desejado da descrição. Durante o salvamento, a prévia continua visível; ao reabrir a tarefa, os prints carregam sem aparecer quebrados e também ficam em Arquivos.",
+      "Clique em um print da descrição para ampliar e baixar a imagem.",
+    ],
+  },
+  {
+    id: "tarefas-da-pauta-vinculadas-e-acessiveis-2026-10-22",
+    title: "Tarefas da pauta com acesso direto",
+    date: "2026-10-22",
+    preview: "meeting-agenda-tasks",
+    audience: "owner",
+    workspaces: ["marketing"],
+    details: [
+      "Ao gerar ou abrir uma tarefa pela pauta, o formulário mostra o cliente da reunião em um campo fixo e salva a tarefa com esse vínculo.",
+      "As tarefas exibidas em cada item da pauta podem ser abertas para ver e editar seus detalhes completos, mantendo o fundo da reunião sem escurecimento adicional.",
+    ],
+  },
+  {
+    id: "anexos-visiveis-nas-subtarefas-recolhidas-2026-10-19",
+    title: "Anexos visíveis nas subtarefas recolhidas",
+    date: "2026-10-19",
+    preview: "subtask-attachment-indicator",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "A subtarefa recolhida mostra um indicador com a quantidade de arquivos anexados. A contagem aparece ao abrir a tarefa e acompanha novos anexos e exclusões, inclusive os registrados offline.",
+    ],
+  },
+  {
+    id: "miniaturas-dos-arquivos-das-subtarefas-2026-10-19",
+    title: "Miniaturas nos arquivos das subtarefas",
+    date: "2026-10-19",
+    preview: "subtask-file-thumbnails",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Os arquivos de imagem das subtarefas exibem uma miniatura ao lado do nome. Imagens aguardando envio offline também mostram uma prévia local; outros arquivos mantêm um ícone de documento.",
+    ],
+  },
+  {
+    id: "imagens-arrastadas-para-subtarefas-2026-10-19",
+    title: "Imagens arrastadas para subtarefas",
+    date: "2026-10-19",
+    preview: "subtask-dragged-images",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Arraste uma ou mais imagens para o campo de descrição da subtarefa. Confira as prévias antes de salvar; as imagens passam a aparecer nos arquivos da subtarefa, inclusive quando o envio fica pendente no modo offline.",
+    ],
+  },
+  {
+    id: "atualizacao-automatica-segura-2026-10-19",
+    title: "Atualização automática do TaskFlow",
+    date: "2026-10-19",
+    preview: "automatic-safe-update",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Quando uma nova versão estiver disponível, o TaskFlow avisa e tenta instalá-la automaticamente após um período sem edição. A página só recarrega se não houver editor aberto nem alterações offline pendentes; o botão Atualizar agora continua disponível.",
+    ],
+  },
+  {
+    id: "prints-colados-nas-subtarefas-2026-10-19",
+    title: "Prints nas subtarefas",
+    date: "2026-10-19",
+    preview: "subtask-pasted-prints",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Cole prints com Ctrl+V ou ⌘V na descrição da subtarefa. Veja a prévia antes de salvar; depois, os prints ficam nos arquivos da subtarefa. Arquivos de até 50 MB também podem ser preparados offline para envio ao reconectar.",
+    ],
+  },
+  {
+    id: "calendario-dos-clientes-e-referencias-2026-10-16",
+    title: "Calendário dos clientes e referências por tópico",
+    date: "2026-10-16",
+    preview: "client-calendar-references",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Clique em Clientes para abrir o calendário geral ou use a seta do menu para escolher um cliente. Os cards mostram apenas o título; clique para abrir a tarefa completa.",
+      "No calendário de um cliente, consulte cadastro, sistemas e senhas ou referências em um painel lateral. Gerenciar clientes mantém acesso à lista e ao cadastro completo.",
+      "A nova aba Referências reúne posts, links, observações e imagens por tópico. Edite uma referência para movê-la entre campanhas ou assuntos do mesmo cliente.",
+    ],
+  },
+  {
+    id: "acoes-google-agenda-sem-rolagem-2026-10-15",
+    title: "Ações da Google Agenda sem rolagem",
+    date: "2026-10-15",
+    preview: "agenda-google-compact-actions",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Os botões Reconectar Google, Desconectar e Sincronizar agora foram compactados para ocupar a mesma linha dentro do cartão, sem barra de rolagem horizontal. Em telas estreitas, o texto pode quebrar dentro dos botões.",
+    ],
+  },
+  {
+    id: "conexao-google-agenda-centralizada-2026-10-15",
+    title: "Conexão da Google Agenda organizada",
+    date: "2026-10-15",
+    preview: "agenda-google-connection-layout",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "O cartão de conexão da Google Agenda centraliza o título e a conta conectada. Reconectar Google, Desconectar e Sincronizar agora ficam na mesma linha, com rolagem horizontal em telas estreitas.",
+    ],
+  },
+  {
+    id: "periodo-dos-relatorios-centralizado-2026-10-15",
+    title: "Período dos Relatórios centralizado",
+    date: "2026-10-15",
+    preview: "reports-period-layout",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "No cartão de período dos Relatórios, o título e o intervalo analisado ficam centralizados. Início, Fim e Mês vigente aparecem na mesma linha; em telas muito estreitas, a linha pode ser deslizada sem cortar os campos.",
+    ],
+  },
+  {
+    id: "clientes-em-dois-cartoes-no-celular-2026-10-15",
+    title: "Clientes em dois cartões por linha no celular",
+    date: "2026-10-15",
+    preview: "mobile-client-cards",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "A lista de clientes mostra dois cartões por linha no celular. Logo, nome, quantidade de tarefas e ações ficam mais próximos; nomes longos quebram de linha e a mensagem de informações ausentes não ocupa espaço no cartão.",
+    ],
+  },
+  {
+    id: "indicadores-do-dashboard-em-duas-colunas-2026-10-15",
+    title: "Indicadores do Dashboard em duas colunas no celular",
+    date: "2026-10-15",
+    preview: "dashboard-mobile-metrics",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "No celular, os indicadores do Dashboard aparecem dois por linha, tanto na visão geral quanto na visão individual. O conteúdo dos cartões foi ajustado para caber na largura menor.",
+    ],
+  },
+  {
+    id: "indicadores-de-obrigacoes-em-duas-colunas-2026-10-15",
+    title: "Indicadores de Obrigações em duas colunas no celular",
+    date: "2026-10-15",
+    preview: "mobile-obligations-metrics",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Na página de Obrigações, Atrasadas e Vencem hoje aparecem lado a lado; Próximos 7 dias e Concluídas no mês ocupam a linha seguinte. Os cartões se ajustam para manter os textos legíveis no celular.",
+    ],
+  },
+  {
+    id: "barra-de-tarefas-alinhada-no-celular-2026-10-15",
+    title: "Controles de tarefas na mesma largura no celular",
+    date: "2026-10-15",
+    preview: "mobile-task-toolbar",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Na página de tarefas, a busca, as visualizações, os filtros e os botões de ação ocupam a mesma largura no celular. Os três tipos de visualização e os três recortes de tarefas se distribuem por toda a linha; os botões de ação preenchem duas colunas quando há espaço.",
+      "As telas de lista e calendário usam a mesma margem da busca em dispositivos móveis.",
+    ],
+  },
+  {
+    id: "filtros-do-dashboard-organizados-2026-10-15",
+    title: "Filtros do Dashboard em uma janela",
+    date: "2026-10-15",
+    preview: "dashboard-filter-panel",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "No Dashboard administrativo, o botão Filtros abre uma janela no celular e no computador. A visualização rápida reúne Vence hoje, Amanhã, Semana, Mês, Atrasadas, Sem prazo, Pendentes, Concluídas e o período personalizado. Limpar filtros retorna à visão de todas as tarefas.",
+      "Os filtros podem ser combinados e atualizam os indicadores, gráficos e listas do painel.",
+      "Prazos informados somente como data são interpretados no dia correto do fuso local.",
+    ],
+  },
+  {
+    id: "grafico-equipe-legivel-2026-10-15",
+    title: "Gráfico da equipe mais legível",
+    date: "2026-10-15",
+    preview: "team-distribution-labels",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "O gráfico Distribuição da equipe mostra uma pessoa por linha, evitando nomes sobrepostos em telas estreitas. Passe sobre a barra para ver o nome completo e clique para abrir a carga da pessoa.",
+    ],
+  },
+  {
+    id: "ambientes-compactos-no-celular-2026-10-15",
+    title: "Ambientes mais compactos no celular",
+    date: "2026-10-15",
+    preview: "compact-environments-mobile",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Na escolha de ambientes, o título, os espaços e os cartões ficaram menores em telas estreitas. Os dois ambientes e seus botões cabem melhor na mesma tela, sem alterar o layout do computador.",
+    ],
+  },
+  {
+    id: "animacao-da-barra-lateral-2026-10-15",
+    title: "Barra lateral com animação",
+    date: "2026-10-15",
+    preview: "animated-sidebar",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "Ao expandir ou recolher a barra lateral no computador, a largura e os nomes dos itens mudam suavemente. A marca, os ícones e o destaque do item ativo permanecem alinhados nas duas posições. No celular, o menu desliza ao abrir e fechar.",
+    ],
+  },
+  {
+    id: "historico-limitado-a-cinco-atualizacoes-2026-10-15",
+    title: "Histórico com as cinco atualizações mais recentes",
+    date: "2026-10-15",
+    preview: "recent-update-history",
+    audience: "all",
+    workspaces: ["marketing", "consultoria"],
+    details: [
+      "O histórico mostra somente as cinco atualizações mais recentes, incluindo esta. As entradas mais antigas foram retiradas do catálogo.",
+    ],
+  },
+];
+
+export function getVisibleAppUpdates(isAdmin: boolean, workspace?: string, email?: string | null, isMobile = false) {
+  return APP_UPDATES.filter(
+    (update) =>
+      update.workspaces.some((name) => name === workspace) &&
+      (!update.devices || (isMobile && update.devices.includes("mobile"))) &&
+      (update.audience === "all" || (update.audience === "admin" && isAdmin) || (update.audience === "owner" && canManageMarketingAccess(email))),
+  ).slice(0, 5);
+}
+
+export function formatAppUpdateDate(date: string) {
+  // Explicit noon avoids moving a date-only release to the previous local day.
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${date}T12:00:00`));
+}

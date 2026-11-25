@@ -1,0 +1,15 @@
+project_id = "cdbiewrwgmhzhzzqlzqx"
+
+# Chamada pelo pg_cron/pg_net (ou testada na mão), nunca pelo navegador de um
+# usuário — a própria função valida um segredo (CRON_SECRET), não faz sentido
+# também exigir um JWT da plataforma pra chegar até esse código.
+[functions.instagram-insights-sync]
+verify_jwt = false
+
+[functions.taskflow-mcp]
+verify_jwt = false
+
+# Chamada pelo trigger de notifications (pg_net, segredo CRON_SECRET) e pelo
+# botão "Enviar teste" do app (valida o JWT do próprio usuário no código).
+[functions.send-push]
+verify_jwt = false

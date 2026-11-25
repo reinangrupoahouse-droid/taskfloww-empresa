@@ -1,0 +1,217 @@
+import { useEffect, useRef, useState } from "react";
+import { Bell, Check, Trash2 } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { isOffline } from "@/lib/offline-sync";
+import { isStandaloneApp, setAppBadge } from "@/lib/push-subscription";
+
+interface Notification {
+  id: string;
+  user_id: string;
+  task_id: string | null;
+  recurring_meeting_occurrence_id?: string | null;
+  recurring_meeting_occurrences?: { workspace_id: string } | null;
+  type: string;
+  title: string;
+  body: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+const NAVIGATION_NOTIFICATION_TYPES = new Set([
+  "mural_post",
+  "mural_reaction",
+  "comment",
+  "mention",
+]);
+
+/** Avisos de prazo ("Vence hoje/amanhã") existem só para o celular. */
+const MOBILE_ONLY_NOTIFICATION_TYPES = new Set(["due_soon"]);
+
+export function excludedNotificationTypes(mobile: boolean): string[] {
+  return [...NAVIGATION_NOTIFICATION_TYPES, ...(mobile ? [] : MOBILE_ONLY_NOTIFICATION_TYPES)];
+}
+
+export function NotificationBell({ mobile = false }: { mobile?: boolean } = {}) {
+  const { user, activeWorkspace } = useAuth();
+  const navigate = useNavigate();
+  const generation = useRef(0);
+  const [items, setItems] = useState<Notification[]>([]);
+  const [open, setOpen] = useState(false);
+
+  const load = async () => {
+    if (!user || isOffline()) return;
+    // Mural e Conversas têm indicadores próprios na navegação. Filtrar no banco
+    // evita que esses avisos ocupem espaço no sino.
+    const version = ++generation.current;
+    const { data, error } = await (supabase.from("notifications") as any)
+      .select("*, tasks(id), recurring_meeting_occurrences(workspace_id)")
+      .eq("user_id", user.id)
+      .or("task_id.is.null,tasks.not.is.null")
+      .not("type", "in", `(${excludedNotificationTypes(mobile).join(",")})`)
+      .order("created_at", { ascending: false })
+      .limit(30);
+    if (error || !data || version !== generation.current) return;
+    const next = ((data ?? []) as Notification[]).filter(
+      (notification) =>
+        notification.type !== "recurring_meeting_reminder" ||
+        notification.recurring_meeting_occurrences?.workspace_id === activeWorkspace?.id,
+    );
+    setItems(next);
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    load();
+    const poll = window.setInterval(() => { if (!document.hidden) void load(); }, 60_000);
+    let timer: ReturnType<typeof setTimeout>;
+    const onVisible = () => {
+      if (document.hidden) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => void load(), 150);
+    };
+    window.addEventListener("online", onVisible);
+    document.addEventListener("visibilitychange", onVisible);
+    const channel = supabase
+      .channel(`notifications-${user.id}-${Math.random().toString(36).slice(2)}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        (payload: any) => {
+          const type = payload.new?.type ?? payload.old?.type;
+          if (excludedNotificationTypes(mobile).includes(type)) return;
+          onVisible();
+        },
+      )
+      .subscribe();
+    return () => {
+      ++generation.current;
+      clearTimeout(timer);
+      window.clearInterval(poll);
+      window.removeEventListener("online", onVisible);
+      document.removeEventListener("visibilitychange", onVisible);
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, activeWorkspace?.id]);
+
+  const unread = items.filter((n) => !n.is_read).length;
+
+  // Número no ícone do app instalado no celular. No computador nada muda.
+  useEffect(() => {
+    if (mobile && isStandaloneApp()) setAppBadge(unread);
+  }, [mobile, unread]);
+
+  const markRead = async (id: string) => {
+    const { error } = await (supabase.from("notifications") as any).update({ is_read: true }).eq("id", id);
+    if (error) { toast.error("Falha ao marcar o aviso como lido."); return; }
+    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+  };
+
+  const markAllRead = async () => {
+    if (!user) return;
+    const unreadIds = items.filter((notification) => !notification.is_read).map(({ id }) => id);
+    if (unreadIds.length === 0) return;
+    const { error } = await (supabase.from("notifications") as any)
+      .update({ is_read: true })
+      .eq("user_id", user.id)
+      .in("id", unreadIds);
+    if (error) { toast.error("Falha ao marcar os avisos como lidos."); return; }
+    setItems((prev) => prev.map((n) => unreadIds.includes(n.id) ? { ...n, is_read: true } : n));
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await (supabase.from("notifications") as any).delete().eq("id", id);
+    if (error) { toast.error("Falha ao excluir o aviso."); return; }
+    setItems((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const openNotification = async (n: Notification) => {
+    if (!n.is_read) await markRead(n.id);
+    setOpen(false);
+    if (n.type === "recurring_meeting_reminder" && n.recurring_meeting_occurrence_id) {
+      navigate({ to: "/meetings", search: { meeting: n.recurring_meeting_occurrence_id } });
+      return;
+    }
+    if (n.task_id) {
+      navigate({ to: "/tasks/list", search: { task: n.task_id, mine: true } as any });
+    } else {
+      navigate({ to: "/tasks/list", search: { mine: true } as any });
+    }
+  };
+
+  if (!user) return null;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button size="icon" variant="ghost" className="relative h-9 w-9" title="Notificações">
+          <Bell className="h-5 w-5" />
+          {unread > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+              {unread > 99 ? "99+" : unread}
+            </span>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-96 p-0">
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold">Notificações</p>
+            <p className="text-xs text-muted-foreground">
+              {unread > 0 ? `${unread} não lidas` : "Tudo em dia"}
+            </p>
+          </div>
+          <Button size="sm" variant="ghost" disabled={unread === 0} onClick={markAllRead}>
+            <Check className="mr-1 h-3.5 w-3.5" />
+            Marcar todas
+          </Button>
+        </div>
+        <div className="max-h-[420px] overflow-y-auto">
+          {items.length === 0 && (
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground">Sem notificações</p>
+          )}
+          {items.map((n) => (
+            <div
+              key={n.id}
+              className={`group relative flex cursor-pointer gap-3 border-b px-4 py-3 text-sm transition hover:bg-muted/50 ${
+                !n.is_read ? "bg-primary/5" : ""
+              }`}
+              onClick={() => openNotification(n)}
+            >
+              {!n.is_read && (
+                <span className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-primary" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="font-medium leading-tight">{n.title}</p>
+                {n.body && (
+                  <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</p>
+                )}
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
+                </p>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  remove(n.id);
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
