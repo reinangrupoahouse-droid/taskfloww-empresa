@@ -179,7 +179,7 @@ function TasksLayout() {
                     onClick={() => setSelectedTask(task)}
                   >
                     <span className="min-w-0">
-                      <span className="block truncate font-medium">{task.title}</span>
+                      <span className="block break-words font-medium">{task.title}</span>
                       <span className="block text-xs text-muted-foreground">
                         {taskClientIds(task).map((id) => clientNames.get(id) ?? "Cliente").join(" · ") || "Sem cliente"}
                       </span>

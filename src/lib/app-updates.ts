@@ -2,6 +2,7 @@ import { canManageMarketingAccess } from "./environment-access";
 
 export type UpdateWorkspace = "marketing" | "consultoria";
 export type UpdatePreviewKind =
+  | "list-tags-files-full-titles"
   | "desktop-app-dock"
   | "graphite-redesign-board"
   | "empresa-black"
@@ -89,6 +90,19 @@ export type AppUpdate = {
 // Keep newest first. The first visible entry determines the update notice and
 // acknowledgement key, so a release is registered once, not in several screens.
 export const APP_UPDATES: readonly AppUpdate[] = [
+  {
+    id: "lista-tags-arquivos-e-kanban-leve-2026-11-25",
+    title: "Lista com tags e arquivos, Kanban mais leve",
+    date: "2026-11-25",
+    preview: "list-tags-files-full-titles",
+    audience: "all",
+    workspaces: ["consultoria"],
+    details: [
+      "Na Lista, a coluna Colaboradores saiu. No lugar entraram Tags, para marcar ou desmarcar ali mesmo, e Arquivos, para abrir os anexos sem entrar na tarefa.",
+      "O nome da tarefa aparece completo, sem reticências, na Lista, na busca e no celular.",
+      "O Kanban usa uma única conexão ao vivo para os anexos de todos os cards e anima menos itens ao abrir, ficando mais leve com muitas tarefas.",
+    ],
+  },
   {
     id: "app-no-dock-do-mac-2026-11-25",
     title: "Taskfloww como app no Mac",

@@ -86,6 +86,7 @@ import { cn } from "@/lib/utils";
 import { updateTaskWithOfflineSupport } from "@/lib/offline-task-mutations";
 import { enqueueOfflineOperation, isOffline } from "@/lib/offline-sync";
 import { readCardAttachments, type CardAttachment as Attachment } from "@/lib/task-card-reads";
+import { subscribeTaskAttachments } from "@/lib/attachments-realtime";
 import { useTaskCardRelated } from "@/hooks/use-task-card-related";
 import { TaskPinButton } from "@/components/TaskCardActivity";
 
@@ -313,18 +314,10 @@ export function TaskCard({
   // react-query — a sessão que fez o upload já atualiza o próprio estado local.
   // Sem isto, quem está com este card aberto em outra sessão (outro ambiente,
   // outra aba) só vê o anexo novo ao recarregar a página.
-  useEffect(() => {
-    const channel = supabase
-      .channel(`task-card-attachments-${task.id}-${Math.random().toString(36).slice(2)}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "attachments",
-          filter: `task_id=eq.${task.id}`,
-        },
-        async ({ new: raw }: { new: Record<string, unknown> }) => {
+  useEffect(
+    () =>
+      subscribeTaskAttachments(task.id, {
+        onInsert: async (raw) => {
           const attachment = raw as unknown as Attachment;
           setAttachments((existing) =>
             existing.some((item) => item.id === attachment.id)
@@ -338,35 +331,20 @@ export function TaskCard({
             if (signed) setThumbs((c) => ({ ...c, [attachment.id]: signed.signedUrl }));
           }
         },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
-          schema: "public",
-          table: "attachments",
-          filter: `task_id=eq.${task.id}`,
-        },
-        ({ old: attachment }: { old: { id: string } }) => {
-          setAttachments((existing) => existing.filter((item) => item.id !== attachment.id));
+        onDelete: (id) => {
+          setAttachments((existing) =>
+            existing.some((item) => item.id === id) ? existing.filter((item) => item.id !== id) : existing,
+          );
           setThumbs((c) => {
-            if (!(attachment.id in c)) return c;
+            if (!(id in c)) return c;
             const next = { ...c };
-            delete next[attachment.id];
+            delete next[id];
             return next;
           });
         },
-      )
-      .subscribe((status: string, err?: Error) => {
-        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || err) {
-          console.warn("[attachments realtime] canal não conectou:", status, err);
-        }
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [task.id]);
+      }),
+    [task.id],
+  );
 
   const related = useTaskCardRelated(task.id);
   useEffect(() => {

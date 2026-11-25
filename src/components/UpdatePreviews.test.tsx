@@ -5,6 +5,15 @@ import { APP_UPDATES } from "@/lib/app-updates";
 import { AppUpdatePreview } from "./UpdatePreviews";
 
 describe("release thumbnails", () => {
+  it("shows full task titles, tags and files in the list without real actions", () => {
+    const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "list-tags-files-full-titles" }));
+    expect(html).toContain("data-list-files-preview");
+    expect(html).toContain("Revisar o contrato de prestação de serviços com o novo fornecedor de logística");
+    expect(html).not.toContain("truncate");
+    expect(html).not.toContain("Colaboradores");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("href=");
+  });
   it("illustrates the Taskfloww app window and Dock icon without real actions", () => {
     const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "desktop-app-dock" }));
     expect(html).toContain("data-desktop-app-icon");

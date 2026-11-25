@@ -93,7 +93,7 @@ export function MobileTaskCard({
         onClick={onOpen}
       >
         <span
-          className={`line-clamp-2 text-[15px] font-medium leading-snug ${isDone ? "line-through decoration-2" : ""}`}
+          className={`break-words text-[15px] font-medium leading-snug [overflow-wrap:anywhere] ${isDone ? "line-through decoration-2" : ""}`}
         >
           {task.title}
         </span>

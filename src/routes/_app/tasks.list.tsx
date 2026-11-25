@@ -5,7 +5,6 @@ import { ptBR } from "date-fns/locale";
 import { ArrowDown, ArrowUp, Check, CheckCircle2, ChevronDown, Copy, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   useBoardTasks,
   useClients,
@@ -13,6 +12,7 @@ import {
   useProfiles,
   useSubtasks,
   useTaskStatuses,
+  useTaskTags,
   useTaskCollaborators,
   type Task,
 } from "@/hooks/use-data";
@@ -39,6 +39,7 @@ import { duplicateTask as duplicateTaskWithContents } from "@/lib/duplicate-task
 import { deleteTaskWithOfflineSupport, updateTaskWithOfflineSupport } from "@/lib/offline-task-mutations";
 import { canDeleteTask } from "@/lib/task-delete-permission";
 import { LinkedText } from "@/components/LinkedText";
+import { ListFilesCell, ListTagsCell } from "@/components/TaskListExtras";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileTaskList } from "@/components/mobile/MobileTaskList";
 import { MobileTaskActions } from "@/components/mobile/MobileTaskActions";
@@ -82,6 +83,7 @@ function ListPage() {
   const { data: profiles = [] } = useProfiles();
   const { data: subtasks = [] } = useSubtasks();
   const { data: statuses = [] } = useTaskStatuses(viewedWorkspaceId);
+  const { data: tags = [] } = useTaskTags(viewedWorkspaceId);
   const { data: collaborators = [] } = useTaskCollaborators();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -470,13 +472,14 @@ function ListPage() {
         <table className="w-full table-fixed text-[13px]">
           <thead className="text-left text-[10.5px] uppercase text-muted-foreground">
             <tr>
-              <th className="w-[25%] px-2 py-2">Tarefa</th>
-              <th className="w-[11%] px-2 py-2">Cliente</th>
-              <th className="w-[13%] px-2 py-2">Responsável</th>
-              <th className="w-[12%] px-2 py-2">Colaboradores</th>
+              <th className="w-[27%] px-2 py-2">Tarefa</th>
+              <th className="w-[10%] px-2 py-2">Cliente</th>
+              <th className="w-[10%] px-2 py-2">Responsável</th>
+              <th className="w-[13%] px-2 py-2">Tags</th>
+              <th className="w-[9%] px-2 py-2">Arquivos</th>
               <th className="w-[10%] px-2 py-2">Status</th>
-              <th className="w-[10%] px-2 py-2">Prioridade</th>
-              <th className="w-[10%] px-2 py-2">
+              <th className="w-[7%] px-2 py-2">Prioridade</th>
+              <th className="w-[8%] px-2 py-2">
                 <button
                   type="button"
                   className="flex items-center gap-1 transition-colors hover:text-foreground"
@@ -494,20 +497,20 @@ function ListPage() {
                   )}
                 </button>
               </th>
-              <th className="w-[9%] px-1 py-2 text-center">Ações</th>
+              <th className="w-[6%] px-1 py-2 text-center">Ações</th>
             </tr>
           </thead>
           <tbody>
             {list.length === 0 && completedParts.length === 0 ? (
               <tr>
-                <td colSpan={8} className="rounded-xl border border-dashed py-14 text-center text-muted-foreground">
+                <td colSpan={9} className="rounded-xl border border-dashed py-14 text-center text-muted-foreground">
                   Nenhuma tarefa neste filtro. Crie uma em “Nova tarefa”.
                 </td>
               </tr>
             ) : list.map((t, index) => {
               if (pendingTaskIds.has(t.id)) return (
                 <tr key={t.id} aria-busy="true" className="tf-list-row animate-pulse">
-                  <td colSpan={8} className="px-3 py-2">{t.title} <span className="text-xs text-muted-foreground">Salvando…</span></td>
+                  <td colSpan={9} className="px-3 py-2">{t.title} <span className="text-xs text-muted-foreground">Salvando…</span></td>
                 </tr>
               );
               const client = clientsById.get(t.client_id ?? "");
@@ -537,13 +540,12 @@ function ListPage() {
                       }
                     : null;
               const dueTextClass = dueUrgencyTextClass[dueUrgencyState(t)];
-              const taskCollaborators = collaboratorsByTask.get(t.id) ?? [];
 
               return (
                 <Fragment key={t.id}>
                 {startsCompletedSection && (
                   <tr aria-label="Concluídas">
-                    <td colSpan={8} className="px-2 py-2">
+                    <td colSpan={9} className="px-2 py-2">
                       <button type="button" onClick={() => setCompletedOpen((current) => !current)} className="flex w-full items-center gap-3 border-t border-dashed border-muted-foreground/45 pt-2 text-left">
                         <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{teamVisibilityWorkspaceId && filters.scope === "mine" ? "Concluídas por mim" : "Concluídas"}</span>
                         <span className="h-px flex-1 border-t border-dashed border-muted-foreground/30" />
@@ -562,7 +564,7 @@ function ListPage() {
                     setOpen(true);
                   }}
                 >
-                  <td className="px-2 py-2 font-medium"><div className="flex items-center gap-2"><span aria-hidden="true" className="tf-status-dot h-2 w-2 shrink-0 rounded-full" style={{ color: displayStatus?.color ?? "#6b7280", backgroundColor: displayStatus?.color ?? "#6b7280" }} /><TaskPinButton task={t} compact /><span className="block truncate"><LinkedText text={t.title} /></span></div>{t.is_draft && <span className="text-[10px] font-semibold text-amber-700">Em elaboração</span>}</td>
+                  <td className="px-2 py-2 font-medium"><div className="flex items-center gap-2"><span aria-hidden="true" className="tf-status-dot h-2 w-2 shrink-0 rounded-full" style={{ color: displayStatus?.color ?? "#6b7280", backgroundColor: displayStatus?.color ?? "#6b7280" }} /><TaskPinButton task={t} compact /><span className="block min-w-0 break-words [overflow-wrap:anywhere]"><LinkedText text={t.title} /></span></div>{t.is_draft && <span className="text-[10px] font-semibold text-amber-700">Em elaboração</span>}</td>
                   <td className="px-2 py-2">
                     <div className="flex flex-wrap gap-1">{client ? (
                       <Badge variant="outline" style={{ borderColor: client.color ?? undefined }}>
@@ -576,15 +578,10 @@ function ListPage() {
                     {assignee?.full_name || assignee?.email || "—"}
                   </td>
                   <td className="px-2 py-2">
-                    {taskCollaborators.length > 0 ? (
-                      <div className="flex -space-x-1" title={taskCollaborators.map((p: any) => p.full_name || p.email).join(", ")}>
-                        {taskCollaborators.slice(0, 3).map((person: any) => {
-                          const name = person.full_name || person.email || "Usuário";
-                          return <Avatar key={person.id} className="h-5 w-5 border border-background"><AvatarImage src={person.avatar_url || undefined} alt={name} /><AvatarFallback className="text-[8px]">{name.slice(0, 1).toUpperCase()}</AvatarFallback></Avatar>;
-                        })}
-                        {taskCollaborators.length > 3 ? <span className="ml-1 text-[10px] text-muted-foreground">+{taskCollaborators.length - 3}</span> : null}
-                      </div>
-                    ) : <span className="text-muted-foreground">—</span>}
+                    <ListTagsCell task={t} tags={tags} />
+                  </td>
+                  <td className="px-2 py-2">
+                    <ListFilesCell taskId={t.id} />
                   </td>
                   <td className="px-2 py-2">
                     {displayStatus && isCompleted ? (
@@ -662,7 +659,7 @@ function ListPage() {
               <>
                 {!hasCompletedTasks && (
                   <tr aria-label="Concluídas">
-                    <td colSpan={8} className="px-2 py-2">
+                    <td colSpan={9} className="px-2 py-2">
                       <button
                         type="button"
                         onClick={() => setCompletedOpen((current) => !current)}
@@ -688,12 +685,13 @@ function ListPage() {
                       <td className="px-2 py-2">
                         <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
                           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                          <span className="truncate font-medium line-through">{subtask.title}</span>
+                          <span className="break-words font-medium line-through">{subtask.title}</span>
                         </div>
                         <span className="pl-5 text-[10px] text-muted-foreground">Subtarefa de {parent.title}</span>
                       </td>
                       <td className="px-2 py-2">{client ? <Badge variant="outline" style={{ borderColor: client.color ?? undefined }}>{client.name}</Badge> : "—"}</td>
                       <td className="px-2 py-2 text-muted-foreground">{ownProfile?.full_name || ownProfile?.email || "—"}</td>
+                      <td className="px-2 py-2 text-muted-foreground">—</td>
                       <td className="px-2 py-2 text-muted-foreground">—</td>
                       <td className="px-2 py-2"><Badge variant="outline" className="border-emerald-500 text-emerald-700 dark:text-emerald-400">Concluída</Badge></td>
                       <td className="px-2 py-2 text-muted-foreground">—</td>

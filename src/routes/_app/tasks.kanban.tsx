@@ -149,7 +149,8 @@ function SortableTaskCard({
     transform: CSS.Translate.toString(transform),
     transition: transition ?? "transform 260ms cubic-bezier(0.23, 1, 0.32, 1)",
     opacity: isDragging ? 0.35 : 1,
-    willChange: "transform",
+    // Camada própria só enquanto se move: uma por card pesava em quadros grandes.
+    willChange: transform ? "transform" : undefined,
   } as CSSProperties;
 
   return (

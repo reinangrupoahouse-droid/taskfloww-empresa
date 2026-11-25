@@ -1881,6 +1881,38 @@ function MobileTasksPushPreview() {
   );
 }
 
+function ListTagsFilesFullTitlesPreview() {
+  // Ilustração estática da Lista com título completo, tags e arquivos. Sem ações.
+  const rows = [
+    { title: "Revisar o contrato de prestação de serviços com o novo fornecedor de logística", tags: [["Jurídico", "#5b6b8c"], ["Urgente", "#b5524f"]], files: 3 },
+    { title: "Enviar relatório mensal", tags: [["Financeiro", "#3f8a5a"]], files: 1 },
+  ];
+  return (
+    <div role="img" aria-label="Prévia da Lista com títulos completos, tags e arquivos" className="space-y-1.5 rounded-xl border bg-card p-2.5 text-[10px]">
+      <div className="grid grid-cols-[1.8fr_1fr_0.7fr] gap-2 px-2 font-semibold uppercase text-muted-foreground">
+        <span>Tarefa</span>
+        <span>Tags</span>
+        <span>Arquivos</span>
+      </div>
+      {rows.map((row) => (
+        <div key={row.title} data-list-row-preview className="grid grid-cols-[1.8fr_1fr_0.7fr] items-start gap-2 rounded-lg border bg-background px-2 py-1.5">
+          <span className="break-words font-medium leading-snug">{row.title}</span>
+          <span className="flex flex-wrap gap-1">
+            {row.tags.map(([name, color]) => (
+              <span key={name} className="rounded px-1 py-0.5 font-semibold text-white" style={{ background: color }}>
+                {name}
+              </span>
+            ))}
+          </span>
+          <span data-list-files-preview className="inline-flex w-fit items-center gap-1 rounded-md border px-1.5 py-0.5">
+            <Paperclip className="h-3 w-3" aria-hidden="true" /> {row.files}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function DesktopAppDockPreview() {
   // Ilustração estática: janela do app sem barra de endereço e o ícone no Dock.
   return (
@@ -1977,6 +2009,7 @@ function EmpresaBlackPreview() {
 }
 
 const UPDATE_PREVIEWS: Record<UpdatePreviewKind, () => ReactNode> = {
+  "list-tags-files-full-titles": ListTagsFilesFullTitlesPreview,
   "desktop-app-dock": DesktopAppDockPreview,
   "graphite-redesign-board": GraphiteRedesignBoardPreview,
   "empresa-black": EmpresaBlackPreview,

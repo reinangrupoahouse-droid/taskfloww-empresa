@@ -217,10 +217,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       reduce
         ? [{ opacity: 0.4 }, { opacity: 1 }]
         : [
-            { opacity: 0, transform: "translateY(10px) scale(0.995)", filter: "blur(4px)" },
-            { opacity: 1, transform: "none", filter: "blur(0)" },
+            { opacity: 0, transform: "translateY(8px)" },
+            { opacity: 1, transform: "none" },
           ],
-      { duration: reduce ? 160 : 380, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
+      { duration: reduce ? 160 : 300, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
     );
   }, [sectionKey]);
 
