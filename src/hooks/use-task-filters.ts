@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type SetStateAction } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import type { TaskFilterValue } from "@/components/TaskFilters";
@@ -116,4 +117,45 @@ export function useTagFilterTaskIds(tagIds?: string[]) {
     },
   });
   return tags.length > 0 ? (data ?? new Set<string>()) : null;
+}
+
+/**
+ * Avisa quando a pessoa acabou de criar uma tarefa que os filtros ativos
+ * escondem — com os filtros salvos entre telas, isso parecia "tarefa sumida".
+ */
+export function useHiddenNewTaskNotice(
+  allTasks: Array<{
+    id: string;
+    title: string;
+    created_by?: string | null;
+    created_at?: string | null;
+  }>,
+  visibleIds: Set<string>,
+  onClearFilters: () => void,
+) {
+  const { user } = useAuth();
+  const known = useRef<Set<string> | null>(null);
+  const since = useRef(Date.now());
+  const clearRef = useRef(onClearFilters);
+  clearRef.current = onClearFilters;
+  useEffect(() => {
+    const ids = new Set(allTasks.map((task) => task.id));
+    if (known.current === null) {
+      known.current = ids;
+      return;
+    }
+    const previous = known.current;
+    known.current = ids;
+    for (const task of allTasks) {
+      if (previous.has(task.id) || visibleIds.has(task.id)) continue;
+      if (!user?.id || task.created_by !== user.id) continue;
+      const created = task.created_at ? Date.parse(task.created_at) : Date.now();
+      if (Number.isFinite(created) && created < since.current - 60_000) continue;
+      toast.info(`“${task.title || "Sem título"}” foi criada, mas está escondida pelos filtros.`, {
+        id: `hidden-new-task-${task.id}`,
+        duration: 10_000,
+        action: { label: "Limpar filtros", onClick: () => clearRef.current() },
+      });
+    }
+  }, [allTasks, visibleIds, user?.id]);
 }

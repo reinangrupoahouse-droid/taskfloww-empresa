@@ -117,7 +117,7 @@ import { enqueueOfflineOperation, isOffline } from "@/lib/offline-sync";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileKanban } from "@/components/mobile/MobileKanban";
-import { usePersistentTaskFilters, useTagFilterTaskIds } from "@/hooks/use-task-filters";
+import { useHiddenNewTaskNotice, usePersistentTaskFilters, useTagFilterTaskIds } from "@/hooks/use-task-filters";
 import { MobileQuickCreate, quickValuesToDialogDefaults } from "@/components/mobile/MobileQuickCreate";
 export const Route = createFileRoute("/_app/tasks/kanban")({
   component: KanbanPage,
@@ -735,6 +735,11 @@ function KanbanPage() {
     teamVisibilityWorkspaceId,
     tagTaskIds,
   ]);
+  const visibleTaskIds = useMemo(
+    () => new Set([...filtered, ...completedTasks].map((task) => task.id)),
+    [filtered, completedTasks],
+  );
+  useHiddenNewTaskNotice(tasks, visibleTaskIds, () => setFilters({}));
 
   const sortedTasks = useMemo(() => {
     const r = [...filtered];

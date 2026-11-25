@@ -5,6 +5,13 @@ import { APP_UPDATES } from "@/lib/app-updates";
 import { AppUpdatePreview } from "./UpdatePreviews";
 
 describe("release thumbnails", () => {
+  it("shows active filters outside the panel and the hidden new task notice, without real actions", () => {
+    const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "visible-active-filters" }));
+    expect(html).toContain("data-active-filter-chip");
+    expect(html).toContain("data-hidden-task-notice");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("href=");
+  });
   it("contrasts the cached page with the fresh server page, without real actions", () => {
     const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "update-fresh-page" }));
     expect(html).toContain("data-update-fresh-page");

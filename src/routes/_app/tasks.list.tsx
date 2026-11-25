@@ -40,7 +40,7 @@ import { deleteTaskWithOfflineSupport, updateTaskWithOfflineSupport } from "@/li
 import { canDeleteTask } from "@/lib/task-delete-permission";
 import { LinkedText } from "@/components/LinkedText";
 import { ClientChip, ListFilesCell, ListTagsCell } from "@/components/TaskListExtras";
-import { usePersistentTaskFilters, useTagFilterTaskIds } from "@/hooks/use-task-filters";
+import { useHiddenNewTaskNotice, usePersistentTaskFilters, useTagFilterTaskIds } from "@/hooks/use-task-filters";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileTaskList } from "@/components/mobile/MobileTaskList";
 import { MobileTaskActions } from "@/components/mobile/MobileTaskActions";
@@ -313,6 +313,8 @@ function ListPage() {
       );
   }, [tasks, subtasks, user?.id, collaboratorTaskIds, viewedWorkspaceId, filters, isCollaborator, teamVisibilityWorkspaceId, tagTaskIds]);
   const hasCompletedTasks = list.some((task) => task.status === "done" || !!task.completed_at);
+  const visibleTaskIds = useMemo(() => new Set(list.map((task) => task.id)), [list]);
+  useHiddenNewTaskNotice(tasks, visibleTaskIds, () => setFilters({}));
 
   const completeTask = async (taskId: string, completionDate: string) => {
     const completedStatus = statuses.find((status) => status.is_completed);

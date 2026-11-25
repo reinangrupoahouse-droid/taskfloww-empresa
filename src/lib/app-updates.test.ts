@@ -7,7 +7,7 @@ import {
 
 describe("application release catalogue", () => {
   it("requires a unique version, date, explanation and preview for every release", () => {
-    expect(APP_UPDATES).toHaveLength(44);
+    expect(APP_UPDATES).toHaveLength(45);
     expect(new Set(APP_UPDATES.map((update) => update.id)).size).toBe(APP_UPDATES.length);
     for (const update of APP_UPDATES) {
       expect(update.id.trim()).not.toBe("");
@@ -36,18 +36,18 @@ describe("application release catalogue", () => {
     }
     // A cópia Empresa só usa o ambiente principal: o novo visual aparece primeiro nele.
     // Só as cinco mais recentes aparecem; a mais nova vem primeiro.
-    expect(consultoria[0].id).toBe("atualizacao-imediata-app-mac-2026-11-25");
-    expect(consultoria[1].id).toBe("filtro-por-tags-salvo-2026-11-25");
-    expect(consultoria[2].id).toBe("lista-tags-arquivos-e-kanban-leve-2026-11-25");
-    expect(consultoria[3].id).toBe("app-no-dock-do-mac-2026-11-25");
-    expect(consultoria[4].id).toBe("visual-grafite-e-quadro-2026-11-25");
+    expect(consultoria[0].id).toBe("filtros-ativos-a-vista-2026-11-25");
+    expect(consultoria[1].id).toBe("atualizacao-imediata-app-mac-2026-11-25");
+    expect(consultoria[2].id).toBe("filtro-por-tags-salvo-2026-11-25");
+    expect(consultoria[3].id).toBe("lista-tags-arquivos-e-kanban-leve-2026-11-25");
+    expect(consultoria[4].id).toBe("app-no-dock-do-mac-2026-11-25");
     expect(consultoria.some((update) => update.id === "painel-lateral-de-criacao-marketing-2026-10-22")).toBe(false);
     expect(APP_UPDATES.find((update) => update.id === "painel-lateral-de-criacao-marketing-2026-10-22")?.workspaces).toContain("marketing");
     expect(consultoria.some((update) => update.id === "painel-lateral-de-criacao-marketing-2026-10-22")).toBe(false);
     expect(ownerMarketing[0].id).toBe(marketing[0].id);
-    expect(ownerConsultoria[0].id).toBe("atualizacao-imediata-app-mac-2026-11-25");
-    expect(ownerConsultoria[1].id).toBe("filtro-por-tags-salvo-2026-11-25");
-    expect(ownerConsultoria[4].id).toBe("visual-grafite-e-quadro-2026-11-25");
+    expect(ownerConsultoria[0].id).toBe("filtros-ativos-a-vista-2026-11-25");
+    expect(ownerConsultoria[1].id).toBe("atualizacao-imediata-app-mac-2026-11-25");
+    expect(ownerConsultoria[4].id).toBe("app-no-dock-do-mac-2026-11-25");
     // This older private release is now outside the five most recent updates.
     expect(ownerMarketing).toHaveLength(5);
     expect(marketing.some((update) => update.id === "whatsapp-varias-conversas-2026-11-10")).toBe(false);
@@ -83,7 +83,7 @@ describe("application release catalogue", () => {
       expect(phone).toHaveLength(5);
       const desktop = getVisibleAppUpdates(false, workspace);
       expect(desktop.some((update) => update.id === "tarefas-no-celular-2026-11-24")).toBe(false);
-      expect(desktop[0].id).toBe(workspace === "consultoria" ? "atualizacao-imediata-app-mac-2026-11-25" : "taskfloww-empresa-preto-2026-11-25");
+      expect(desktop[0].id).toBe(workspace === "consultoria" ? "filtros-ativos-a-vista-2026-11-25" : "taskfloww-empresa-preto-2026-11-25");
     }
   });
 

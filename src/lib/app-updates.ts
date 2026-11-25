@@ -2,6 +2,7 @@ import { canManageMarketingAccess } from "./environment-access";
 
 export type UpdateWorkspace = "marketing" | "consultoria";
 export type UpdatePreviewKind =
+  | "visible-active-filters"
   | "update-fresh-page"
   | "tag-filter-saved"
   | "list-tags-files-full-titles"
@@ -92,6 +93,18 @@ export type AppUpdate = {
 // Keep newest first. The first visible entry determines the update notice and
 // acknowledgement key, so a release is registered once, not in several screens.
 export const APP_UPDATES: readonly AppUpdate[] = [
+  {
+    id: "filtros-ativos-a-vista-2026-11-25",
+    title: "Filtros ativos sempre à vista",
+    date: "2026-11-25",
+    preview: "visible-active-filters",
+    audience: "all",
+    workspaces: ["consultoria"],
+    details: [
+      "No Kanban, na Lista e no Calendário, os filtros ligados aparecem ao lado do botão Filtros, cada um com um x para remover, além de Limpar filtros.",
+      "Se você criar uma tarefa que os filtros atuais escondem, um aviso diz isso e oferece Limpar filtros, em vez de a tarefa parecer sumida.",
+    ],
+  },
   {
     id: "atualizacao-imediata-app-mac-2026-11-25",
     title: "Lista com a cor do cliente e atualizações na hora no Mac",

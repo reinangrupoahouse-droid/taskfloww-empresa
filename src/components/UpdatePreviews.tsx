@@ -39,6 +39,7 @@ import {
   LogOut,
   ShieldCheck,
   Megaphone,
+  X,
 } from "lucide-react";
 import { APP_UPDATES, type UpdatePreviewKind } from "@/lib/app-updates";
 import { CalendarTaskPin } from "@/components/CalendarTaskPin";
@@ -1881,6 +1882,28 @@ function MobileTasksPushPreview() {
   );
 }
 
+function VisibleActiveFiltersPreview() {
+  // Ilustração estática dos filtros ativos à vista e do aviso de tarefa escondida.
+  return (
+    <div role="img" aria-label="Prévia dos filtros ativos à vista e do aviso de tarefa escondida" className="space-y-2 rounded-xl border bg-card p-3 text-[10px]">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="rounded-full border px-2 py-0.5 font-medium">Filtros 2</span>
+        <span data-active-filter-chip className="inline-flex items-center gap-1 rounded-full border bg-foreground/[0.06] px-2 py-0.5">
+          Cliente: Qualinutri <X className="h-2.5 w-2.5" aria-hidden="true" />
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full border bg-foreground/[0.06] px-2 py-0.5">
+          Tags: Urgente <X className="h-2.5 w-2.5" aria-hidden="true" />
+        </span>
+        <span className="text-muted-foreground">Limpar filtros</span>
+      </div>
+      <div data-hidden-task-notice className="flex items-center justify-between gap-2 rounded-lg border bg-background px-2 py-1.5 shadow-sm">
+        <span>“Revisar contrato” foi criada, mas está escondida pelos filtros.</span>
+        <span className="shrink-0 rounded-md bg-primary px-1.5 py-0.5 font-semibold text-primary-foreground">Limpar filtros</span>
+      </div>
+    </div>
+  );
+}
+
 function UpdateFreshPagePreview() {
   // Ilustração estática: versão antiga em cache trocada pela versão nova do servidor.
   return (
@@ -2069,6 +2092,7 @@ function EmpresaBlackPreview() {
 }
 
 const UPDATE_PREVIEWS: Record<UpdatePreviewKind, () => ReactNode> = {
+  "visible-active-filters": VisibleActiveFiltersPreview,
   "update-fresh-page": UpdateFreshPagePreview,
   "tag-filter-saved": TagFilterSavedPreview,
   "list-tags-files-full-titles": ListTagsFilesFullTitlesPreview,

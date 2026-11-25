@@ -547,6 +547,33 @@ export function TaskFilters({
           )}
         </PopoverContent>
       </Popover>
+      {/* Filtros ficam salvos entre telas: deixá-los sempre à vista evita
+          "tarefa sumida" por um filtro esquecido. "Todas/Atribuídas" já aparece ao lado. */}
+      {activeChips.some((chip) => chip.key !== "scope") && (
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5" aria-label="Filtros ativos">
+          {activeChips
+            .filter((chip) => chip.key !== "scope")
+            .map((chip) => (
+              <button
+                key={chip.key}
+                type="button"
+                onClick={chip.clear}
+                title="Remover este filtro"
+                className="tf-badge-pop inline-flex max-w-full items-center gap-1 rounded-full border border-foreground/15 bg-foreground/[0.06] px-2.5 py-1 text-xs font-medium transition-[background-color,transform] hover:bg-foreground/10 active:scale-95"
+              >
+                <span className="min-w-0 break-words text-left">{chip.label}</span>
+                <X className="h-3 w-3 shrink-0" />
+              </button>
+            ))}
+          <button
+            type="button"
+            onClick={clearAll}
+            className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <RotateCcw className="h-3 w-3" /> Limpar filtros
+          </button>
+        </div>
+      )}
     </div>
   );
 }
