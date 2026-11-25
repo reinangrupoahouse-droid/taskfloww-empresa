@@ -1881,6 +1881,35 @@ function MobileTasksPushPreview() {
   );
 }
 
+function UpdateFreshPagePreview() {
+  // Ilustração estática: versão antiga em cache trocada pela versão nova do servidor.
+  return (
+    <div role="img" aria-label="Prévia da Lista com a cor do cliente e da atualização que busca a página nova" className="space-y-2 rounded-xl border bg-card p-3 text-[10px]">
+      <div
+        data-list-client-color
+        className="flex items-center gap-2 rounded-lg border px-2 py-1.5"
+        style={{ background: "color-mix(in oklab, #8b1e1e 10%, var(--card))", borderColor: "color-mix(in oklab, #8b1e1e 40%, var(--border))" }}
+      >
+        <span className="min-w-0 flex-1 font-medium">Validar fluxo do novo cliente</span>
+        <span className="rounded px-1.5 py-0.5 font-bold uppercase tracking-wide text-white" style={{ background: "#8b1e1e" }}>
+          Cliente Aurora
+        </span>
+      </div>
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+      <div className="rounded-lg border border-dashed p-2 text-muted-foreground line-through decoration-1">
+        Versão guardada
+        <span className="mt-1 block text-[9px] no-underline">há 10 min</span>
+      </div>
+      <RefreshCw className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      <div data-update-fresh-page className="rounded-lg border bg-background p-2 font-semibold shadow-sm">
+        Versão nova
+        <span className="mt-1 block text-[9px] font-normal text-muted-foreground">direto do servidor</span>
+      </div>
+    </div>
+    </div>
+  );
+}
+
 function TagFilterSavedPreview() {
   // Ilustração estática do painel de filtros com tags marcadas. Sem ações reais.
   const tags: Array<[string, string, boolean]> = [
@@ -2040,6 +2069,7 @@ function EmpresaBlackPreview() {
 }
 
 const UPDATE_PREVIEWS: Record<UpdatePreviewKind, () => ReactNode> = {
+  "update-fresh-page": UpdateFreshPagePreview,
   "tag-filter-saved": TagFilterSavedPreview,
   "list-tags-files-full-titles": ListTagsFilesFullTitlesPreview,
   "desktop-app-dock": DesktopAppDockPreview,

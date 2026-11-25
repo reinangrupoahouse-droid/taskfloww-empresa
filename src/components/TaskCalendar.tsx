@@ -1164,7 +1164,7 @@ function CalendarTaskItem({
       aria-busy={saving}
       className={`relative flex w-full min-w-0 items-center gap-1.5 border text-left transition ${
         marketingStyle
-          ? `rounded-full pl-8 pr-2 shadow-sm saturate-125 hover:-translate-y-px hover:brightness-110 hover:saturate-150 hover:shadow-md group-hover/calendar-complete:-translate-y-px group-hover/calendar-complete:brightness-110 group-hover/calendar-complete:saturate-150 group-hover/calendar-complete:shadow-md ${expanded ? "min-h-9 py-1" : "h-9 py-0"}`
+          ? `rounded-[1.1rem] pl-8 pr-2.5 shadow-sm saturate-125 hover:-translate-y-px hover:brightness-110 hover:saturate-150 hover:shadow-md group-hover/calendar-complete:-translate-y-px group-hover/calendar-complete:brightness-110 group-hover/calendar-complete:saturate-150 group-hover/calendar-complete:shadow-md ${expanded ? "min-h-9 py-1.5" : "min-h-9 py-1.5"}`
           : `rounded-md shadow-sm hover:-translate-y-px hover:shadow ${expanded ? "px-2 py-2" : "px-1 py-1"}`
       } ${!marketingStyle && onComplete && !completed && !titleOnly ? "pr-7" : ""} ${marketingStyle && !task.client_id && !completed ? "border-2 border-dashed" : ""} ${drag ? "cursor-grab active:cursor-grabbing touch-manipulation" : ""} ${drag?.isDragging ? "opacity-35" : ""} ${completed ? marketingStyle ? "border-emerald-500 bg-emerald-200 text-emerald-950 ring-1 ring-emerald-400/80" : "border-emerald-500 bg-emerald-100 text-emerald-950 ring-1 ring-emerald-300/80" : marketingStyle ? "" : "hover:brightness-105"}`}
       style={
@@ -1197,7 +1197,7 @@ function CalendarTaskItem({
         />
       ) : null}
       <span
-        className={`min-w-0 flex-1 ${marketingStyle ? "break-words text-xs font-semibold leading-[14px]" : "break-words font-semibold leading-tight [overflow-wrap:anywhere]"} ${expanded && !marketingStyle ? "text-sm" : !marketingStyle ? "text-[11px]" : ""} ${completed ? "line-through decoration-2 decoration-emerald-700/80" : ""}`}
+        className={`min-w-0 flex-1 ${marketingStyle ? "break-words text-xs font-semibold leading-[15px] [overflow-wrap:anywhere]" : "break-words font-semibold leading-tight [overflow-wrap:anywhere]"} ${expanded && !marketingStyle ? "text-sm" : !marketingStyle ? "text-[11px]" : ""} ${completed ? "line-through decoration-2 decoration-emerald-700/80" : ""}`}
       >
         {!titleOnly && task.is_draft ? "Em elaboração · " : ""}
         {task.title}

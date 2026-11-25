@@ -2,6 +2,7 @@ import { canManageMarketingAccess } from "./environment-access";
 
 export type UpdateWorkspace = "marketing" | "consultoria";
 export type UpdatePreviewKind =
+  | "update-fresh-page"
   | "tag-filter-saved"
   | "list-tags-files-full-titles"
   | "desktop-app-dock"
@@ -91,6 +92,20 @@ export type AppUpdate = {
 // Keep newest first. The first visible entry determines the update notice and
 // acknowledgement key, so a release is registered once, not in several screens.
 export const APP_UPDATES: readonly AppUpdate[] = [
+  {
+    id: "atualizacao-imediata-app-mac-2026-11-25",
+    title: "Lista com a cor do cliente e atualizações na hora no Mac",
+    date: "2026-11-25",
+    preview: "update-fresh-page",
+    audience: "all",
+    workspaces: ["consultoria"],
+    details: [
+      "Na Lista, cada tarefa leva a cor do cliente: o cliente aparece preenchido com a cor dele, como no Kanban, e a linha fica levemente tingida.",
+      "O status aparece por inteiro, sem reticências, e as colunas ficaram mais espaçadas.",
+      "No Calendário, a etiqueta da tarefa cresce com o nome completo em vez de vazar por cima do dia.",
+      "Ao clicar em atualizar, o Taskfloww busca a página nova direto do servidor antes de recarregar. Antes, logo após uma publicação, o app do Dock podia reabrir a versão anterior por até 10 minutos. Nada salvo é apagado.",
+    ],
+  },
   {
     id: "filtro-por-tags-salvo-2026-11-25",
     title: "Filtro por tags salvo, tags novas na Lista e arquivos no Calendário",

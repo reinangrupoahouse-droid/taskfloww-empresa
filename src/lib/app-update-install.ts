@@ -126,3 +126,31 @@ export async function activateAppUpdate(
   }
   return false;
 }
+
+/**
+ * O GitHub Pages manda guardar o HTML por 10 minutos (Cache-Control: max-age=600).
+ * Sem isto, recarregar logo após uma publicação reabria a página antiga — no
+ * app do Dock do Safari não há Cmd+Shift+R para contornar. Buscar a página
+ * com `cache: "reload"` troca a cópia guardada pela nova; o recarregamento
+ * seguinte já abre a versão publicada. Não apaga dados, filas offline nem
+ * preferências: só renova o HTML em cache.
+ */
+export async function refreshCachedAppShell(
+  urls: string[] = typeof window === "undefined"
+    ? []
+    : [window.location.href, `${window.location.origin}${import.meta.env.BASE_URL}`],
+  timeout = 5000,
+) {
+  if (typeof fetch !== "function") return;
+  const controller = typeof AbortController === "undefined" ? null : new AbortController();
+  const timer = setTimeout(() => controller?.abort(), timeout);
+  try {
+    await Promise.allSettled(
+      [...new Set(urls)].map((url) =>
+        fetch(url, { cache: "reload", credentials: "same-origin", signal: controller?.signal }),
+      ),
+    );
+  } finally {
+    clearTimeout(timer);
+  }
+}

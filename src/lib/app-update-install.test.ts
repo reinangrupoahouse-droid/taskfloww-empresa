@@ -195,3 +195,23 @@ describe("safe app update activation", () => {
     await expect(activateAppUpdate(entry)).resolves.toBe(true);
   });
 });
+
+describe("refreshCachedAppShell", () => {
+  it("re-downloads the page bypassing the HTTP cache, without failing the update", async () => {
+    const { refreshCachedAppShell } = await import("./app-update-install");
+    const calls: Array<[string, RequestInit | undefined]> = [];
+    const original = globalThis.fetch;
+    globalThis.fetch = (async (url: string, init?: RequestInit) => {
+      calls.push([url, init]);
+      if (url.endsWith("/falha")) throw new TypeError("offline");
+      return new Response("ok");
+    }) as typeof fetch;
+    try {
+      await refreshCachedAppShell(["https://x.test/app/", "https://x.test/app/", "https://x.test/falha"]);
+    } finally {
+      globalThis.fetch = original;
+    }
+    expect(calls.map(([url]) => url)).toEqual(["https://x.test/app/", "https://x.test/falha"]);
+    expect(calls.every(([, init]) => init?.cache === "reload")).toBe(true);
+  });
+});

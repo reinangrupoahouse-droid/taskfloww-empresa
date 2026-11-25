@@ -852,7 +852,7 @@
    ─────────────────────────────────────────────────────────────────────────── */
 .tf-list table {
   border-collapse: separate;
-  border-spacing: 0 6px;
+  border-spacing: 0 8px;
 }
 .tf-list thead th {
   font-weight: 600;
@@ -862,11 +862,14 @@
   padding-bottom: 0.35rem;
 }
 .tf-list-row > td {
-  background: var(--card);
+  --row-bg: var(--card);
+  background: var(--row-bg);
+  /* Cobre a fresta de meio pixel entre células com largura fracionada. */
+  box-shadow: 1px 0 0 0 var(--row-bg);
   border-top: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
   border-bottom: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
-  padding-top: 0.65rem !important;
-  padding-bottom: 0.65rem !important;
+  padding-top: 0.8rem !important;
+  padding-bottom: 0.8rem !important;
   transition:
     background-color 180ms ease,
     border-color 180ms ease,
@@ -878,8 +881,20 @@
   padding-left: 0.85rem !important;
 }
 .tf-list-row > td:last-child {
+  box-shadow: none;
   border-right: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
   border-radius: 0 0.75rem 0.75rem 0;
+}
+/* Cada linha leva a cor do cliente: fundo levemente tingido e borda na cor. */
+.tf-list-row[data-client-color] > td {
+  --row-bg: color-mix(in oklab, var(--row-color) 9%, var(--card));
+  background: var(--row-bg);
+  border-color: color-mix(in oklab, var(--row-color) 38%, var(--border));
+}
+.dark .tf-list-row[data-client-color] > td {
+  --row-bg: color-mix(in oklab, var(--row-color) 14%, var(--card));
+  background: var(--row-bg);
+  border-color: color-mix(in oklab, var(--row-color) 45%, var(--border));
 }
 .tf-list-row {
   animation: tf-row-in 420ms var(--ease-out) both;
@@ -898,12 +913,19 @@
   }
 }
 @media (hover: hover) and (pointer: fine) {
-  .tf-list-row:hover > td {
-    background: color-mix(in oklab, var(--card) 85%, var(--foreground) 4%);
-    border-color: color-mix(in oklab, var(--ring) 45%, var(--border));
+  .tf-list-row[data-client-color]:hover > td {
+    --row-bg: color-mix(in oklab, var(--row-color) 15%, var(--card));
+    background: var(--row-bg) !important;
+    border-color: color-mix(in oklab, var(--row-color) 60%, var(--border)) !important;
   }
-  .tf-list-row:hover > td:first-child {
-    box-shadow: -1px 0 0 0 transparent;
+  .dark .tf-list-row[data-client-color]:hover > td {
+    --row-bg: color-mix(in oklab, var(--row-color) 22%, var(--card));
+    background: var(--row-bg) !important;
+  }
+  .tf-list-row:hover > td {
+    --row-bg: color-mix(in oklab, var(--card) 85%, var(--foreground) 4%);
+    background: var(--row-bg);
+    border-color: color-mix(in oklab, var(--ring) 45%, var(--border));
   }
   .tf-list-row .tf-row-actions {
     opacity: 0.55;

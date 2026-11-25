@@ -8,6 +8,7 @@ import { listOfflineOperations } from "@/lib/offline-sync";
 import {
   activateAppUpdate,
   checkAppWorkerUpdate,
+  refreshCachedAppShell,
   waitForAppWorkerControl,
 } from "@/lib/app-update-install";
 import {
@@ -223,6 +224,7 @@ export function UpdateCenter() {
           autoResumeRef.current = null;
           return;
         }
+        await refreshCachedAppShell();
         window.location.reload();
       } finally {
         updateInstallationRunning = false;
@@ -483,6 +485,7 @@ export function UpdateCenter() {
       } catch {
         /* Still allow the verified reload. */
       }
+      await refreshCachedAppShell();
       window.location.reload();
     } catch (error) {
       if (!automatic) setUpdateError(

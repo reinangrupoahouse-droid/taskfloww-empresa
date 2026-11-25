@@ -5,6 +5,13 @@ import { APP_UPDATES } from "@/lib/app-updates";
 import { AppUpdatePreview } from "./UpdatePreviews";
 
 describe("release thumbnails", () => {
+  it("contrasts the cached page with the fresh server page, without real actions", () => {
+    const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "update-fresh-page" }));
+    expect(html).toContain("data-update-fresh-page");
+    expect(html).toContain("data-list-client-color");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("href=");
+  });
   it("shows selected tag filters and that the filter stays saved, without real actions", () => {
     const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "tag-filter-saved" }));
     expect(html).toContain('data-tag-filter-preview="active"');

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ArrowDown, ArrowUp, Check, CheckCircle2, ChevronDown, Copy, Plus, Trash2 } from "lucide-react";
@@ -39,7 +39,7 @@ import { duplicateTask as duplicateTaskWithContents } from "@/lib/duplicate-task
 import { deleteTaskWithOfflineSupport, updateTaskWithOfflineSupport } from "@/lib/offline-task-mutations";
 import { canDeleteTask } from "@/lib/task-delete-permission";
 import { LinkedText } from "@/components/LinkedText";
-import { ListFilesCell, ListTagsCell } from "@/components/TaskListExtras";
+import { ClientChip, ListFilesCell, ListTagsCell } from "@/components/TaskListExtras";
 import { usePersistentTaskFilters, useTagFilterTaskIds } from "@/hooks/use-task-filters";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileTaskList } from "@/components/mobile/MobileTaskList";
@@ -487,13 +487,13 @@ function ListPage() {
         <table className="w-full table-fixed text-[13px]">
           <thead className="text-left text-[10.5px] uppercase text-muted-foreground">
             <tr>
-              <th className="w-[27%] px-2 py-2">Tarefa</th>
-              <th className="w-[10%] px-2 py-2">Cliente</th>
-              <th className="w-[10%] px-2 py-2">Responsável</th>
-              <th className="w-[13%] px-2 py-2">Tags</th>
-              <th className="w-[9%] px-2 py-2">Arquivos</th>
-              <th className="w-[10%] px-2 py-2">Status</th>
-              <th className="w-[7%] px-2 py-2">Prioridade</th>
+              <th className="w-[28%] px-2 py-2">Tarefa</th>
+              <th className="w-[11%] px-2 py-2">Cliente</th>
+              <th className="w-[8%] px-2 py-2">Responsável</th>
+              <th className="w-[12%] px-2 py-2">Tags</th>
+              <th className="w-[8%] px-2 py-2">Arquivos</th>
+              <th className="w-[11%] px-2 py-2">Status</th>
+              <th className="w-[8%] px-2 py-2">Prioridade</th>
               <th className="w-[8%] px-2 py-2">
                 <button
                   type="button"
@@ -574,6 +574,8 @@ function ListPage() {
                   className={`tf-list-row cursor-pointer ${
                     isCompleted ? "opacity-60 grayscale-[0.2]" : ""
                   }`}
+                  data-client-color={client?.color ? "true" : undefined}
+                  style={client?.color ? ({ ["--row-color" as string]: client.color } as CSSProperties) : undefined}
                   onClick={() => {
                     setEdit(t);
                     setOpen(true);
@@ -582,12 +584,10 @@ function ListPage() {
                   <td className="px-2 py-2 font-medium"><div className="flex items-center gap-2"><span aria-hidden="true" className="tf-status-dot h-2 w-2 shrink-0 rounded-full" style={{ color: displayStatus?.color ?? "#6b7280", backgroundColor: displayStatus?.color ?? "#6b7280" }} /><TaskPinButton task={t} compact /><span className="block min-w-0 break-words [overflow-wrap:anywhere]"><LinkedText text={t.title} /></span></div>{t.is_draft && <span className="text-[10px] font-semibold text-amber-700">Em elaboração</span>}</td>
                   <td className="px-2 py-2">
                     <div className="flex flex-wrap gap-1">{client ? (
-                      <Badge variant="outline" style={{ borderColor: client.color ?? undefined }}>
-                        {client.name}
-                      </Badge>
+                      <ClientChip name={client.name} color={client.color} />
                     ) : (
                       <span className="text-muted-foreground">—</span>
-                    )}{additionalClients.map((extraClient) => <Badge key={extraClient.id} variant="outline" style={{ borderColor: extraClient.color ?? undefined }}>{extraClient.name}</Badge>)}</div>
+                    )}{additionalClients.map((extraClient) => <ClientChip key={extraClient.id} name={extraClient.name} color={extraClient.color} />)}</div>
                   </td>
                   <td className="px-2 py-2 text-muted-foreground">
                     {assignee?.full_name || assignee?.email || "—"}
@@ -600,12 +600,12 @@ function ListPage() {
                   </td>
                   <td className="px-2 py-2">
                     {displayStatus && isCompleted ? (
-                      <Badge variant="outline" className="max-w-full truncate" style={{ borderColor: displayStatus.color, color: displayStatus.color }}>{displayStatus.name}</Badge>
+                      <Badge variant="outline" className="max-w-full whitespace-normal text-left leading-tight" style={{ borderColor: displayStatus.color, color: `color-mix(in oklab, ${displayStatus.color} 45%, var(--foreground))` }}>{displayStatus.name}</Badge>
                     ) : (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button type="button" disabled={changingTaskId === t.id} onClick={(event) => event.stopPropagation()} className="flex max-w-full items-center gap-1 rounded-full border px-2 py-1 font-semibold transition hover:brightness-95 disabled:opacity-50" style={{ borderColor: displayStatus?.color ?? "#64748b", color: displayStatus?.color ?? "#64748b", backgroundColor: `color-mix(in srgb, ${displayStatus?.color ?? "#64748b"} 12%, transparent)` }} title="Alterar status sem abrir a tarefa">
-                            <span className="truncate">{displayStatus?.name ?? "Escolher status"}</span><ChevronDown className="h-3 w-3 shrink-0" />
+                          <button type="button" disabled={changingTaskId === t.id} onClick={(event) => event.stopPropagation()} className="flex max-w-full items-center gap-1 rounded-xl border px-2.5 py-1 font-semibold transition hover:brightness-95 disabled:opacity-50" style={{ borderColor: displayStatus?.color ?? "#64748b", color: `color-mix(in oklab, ${displayStatus?.color ?? "#64748b"} 45%, var(--foreground))`, backgroundColor: `color-mix(in srgb, ${displayStatus?.color ?? "#64748b"} 16%, transparent)` }} title="Alterar status sem abrir a tarefa">
+                            <span className="text-left leading-tight">{displayStatus?.name ?? "Escolher status"}</span><ChevronDown className="h-3 w-3 shrink-0" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" onClick={(event) => event.stopPropagation()}>
@@ -629,7 +629,7 @@ function ListPage() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </td>
-                  <td className={`border-r px-2 py-2 whitespace-nowrap ${dueTextClass}`}>
+                  <td className={`px-2 py-2 whitespace-nowrap ${dueTextClass}`}>
                     {t.due_date
                       ? `${format(new Date(t.due_date), "dd MMM yyyy", { locale: ptBR })}${t.due_time ? ` · ${t.due_time.slice(0, 5)}` : ""}`
                       : "—"}
@@ -704,7 +704,7 @@ function ListPage() {
                         </div>
                         <span className="pl-5 text-[10px] text-muted-foreground">Subtarefa de {parent.title}</span>
                       </td>
-                      <td className="px-2 py-2">{client ? <Badge variant="outline" style={{ borderColor: client.color ?? undefined }}>{client.name}</Badge> : "—"}</td>
+                      <td className="px-2 py-2">{client ? <ClientChip name={client.name} color={client.color} /> : "—"}</td>
                       <td className="px-2 py-2 text-muted-foreground">{ownProfile?.full_name || ownProfile?.email || "—"}</td>
                       <td className="px-2 py-2 text-muted-foreground">—</td>
                       <td className="px-2 py-2 text-muted-foreground">—</td>

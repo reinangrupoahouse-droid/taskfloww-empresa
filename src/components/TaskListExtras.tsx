@@ -23,7 +23,7 @@ const stop = (event: MouseEvent) => event.stopPropagation();
 type ListTag = { id: string; name: string; color: string };
 type ListTask = { id: string; tag_id?: string | null };
 
-function readableText(hex: string) {
+export function readableText(hex: string) {
   const value = hex.replace("#", "");
   if (value.length !== 6) return "#111";
   const r = parseInt(value.slice(0, 2), 16);
@@ -336,5 +336,23 @@ export function ListFilesCell({
         />
       </div>
     </>
+  );
+}
+
+/** Cliente na Lista com a cor preenchida, como a faixa do card no Kanban. */
+export function ClientChip({ name, color }: { name: string; color?: string | null }) {
+  if (!color)
+    return (
+      <span className="inline-flex max-w-full rounded-md border px-2 py-0.5 text-xs font-semibold leading-tight">
+        {name}
+      </span>
+    );
+  return (
+    <span
+      className="inline-flex max-w-full items-center rounded-md px-2 py-0.5 text-xs font-bold uppercase leading-tight tracking-wide shadow-[inset_0_1px_0_rgb(255_255_255/0.22),inset_0_-1px_0_rgb(0_0_0/0.12)]"
+      style={{ background: color, color: readableText(color) }}
+    >
+      {name}
+    </span>
   );
 }
