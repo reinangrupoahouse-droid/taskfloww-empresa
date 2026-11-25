@@ -2,6 +2,7 @@ import { canManageMarketingAccess } from "./environment-access";
 
 export type UpdateWorkspace = "marketing" | "consultoria";
 export type UpdatePreviewKind =
+  | "desktop-app-dock"
   | "graphite-redesign-board"
   | "empresa-black"
   | "mobile-tasks-push"
@@ -88,6 +89,19 @@ export type AppUpdate = {
 // Keep newest first. The first visible entry determines the update notice and
 // acknowledgement key, so a release is registered once, not in several screens.
 export const APP_UPDATES: readonly AppUpdate[] = [
+  {
+    id: "app-no-dock-do-mac-2026-11-25",
+    title: "Taskfloww como app no Mac",
+    date: "2026-11-25",
+    preview: "desktop-app-dock",
+    audience: "all",
+    workspaces: ["consultoria"],
+    details: [
+      "No Safari do Mac, use Arquivo > Adicionar ao Dock para abrir o Taskfloww em uma janela própria, sem barra de endereço.",
+      "O app ganhou ícone grafite com o símbolo do Taskfloww e o nome Taskfloww no Dock e no Launchpad.",
+      "No iPhone, Compartilhar > Adicionar à Tela de Início usa o mesmo ícone.",
+    ],
+  },
   {
     id: "visual-grafite-e-quadro-2026-11-25",
     title: "Novo visual grafite e a aba Quadro",

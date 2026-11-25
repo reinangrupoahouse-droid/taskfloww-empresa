@@ -1881,6 +1881,49 @@ function MobileTasksPushPreview() {
   );
 }
 
+function DesktopAppDockPreview() {
+  // Ilustração estática: janela do app sem barra de endereço e o ícone no Dock.
+  return (
+    <div
+      role="img"
+      aria-label="Prévia do Taskfloww aberto como app do Mac, com o ícone no Dock"
+      className="relative h-44 overflow-hidden rounded-xl border border-[#2a2f36] bg-gradient-to-b from-[#3a4150] to-[#1a1d22]"
+    >
+      <div className="absolute left-1/2 top-3 w-[78%] -translate-x-1/2 overflow-hidden rounded-lg border border-white/10 bg-[#0e1013] shadow-[0_18px_40px_-16px_rgb(0_0_0/0.8)]">
+        <div className="flex items-center gap-1 border-b border-white/5 bg-[#16191d] px-2 py-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#ff5f57]" />
+          <span className="h-1.5 w-1.5 rounded-full bg-[#febc2e]" />
+          <span className="h-1.5 w-1.5 rounded-full bg-[#28c840]" />
+          <span className="ml-2 text-[8px] font-medium text-[#e8eaed]">Taskfloww</span>
+        </div>
+        <div className="grid grid-cols-[38px_1fr] gap-2 p-2">
+          <div className="space-y-1">
+            {[0, 1, 2, 3].map((i) => (
+              <span key={i} className={`block h-2 rounded-sm ${i === 2 ? "bg-[#d6dae0]" : "bg-[#2a2f36]"}`} />
+            ))}
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <span key={i} className="h-12 rounded-md border border-white/5 bg-[#1b1e23]" />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 items-end gap-1.5 rounded-xl border border-white/15 bg-white/15 px-2 py-1.5 backdrop-blur">
+        <span className="h-6 w-6 rounded-[7px] bg-[#c9ced6]/50" />
+        <span className="h-6 w-6 rounded-[7px] bg-[#8fa3bf]/50" />
+        <span
+          data-desktop-app-icon
+          className="grid h-8 w-8 place-items-center rounded-[9px] bg-gradient-to-b from-[#4a505a] to-[#16191d] text-[13px] font-bold italic text-[#eef0f3] shadow-[inset_0_1px_0_rgb(255_255_255/0.25)]"
+        >
+          T
+        </span>
+        <span className="h-6 w-6 rounded-[7px] bg-[#c9ced6]/50" />
+      </div>
+    </div>
+  );
+}
+
 function GraphiteRedesignBoardPreview() {
   // Ilustração estática: menu grafite sem logotipo externo, com a aba Quadro
   // ativa e um pequeno mapa mental. Nada aqui executa ações reais.
@@ -1934,6 +1977,7 @@ function EmpresaBlackPreview() {
 }
 
 const UPDATE_PREVIEWS: Record<UpdatePreviewKind, () => ReactNode> = {
+  "desktop-app-dock": DesktopAppDockPreview,
   "graphite-redesign-board": GraphiteRedesignBoardPreview,
   "empresa-black": EmpresaBlackPreview,
   "mobile-tasks-push": MobileTasksPushPreview,

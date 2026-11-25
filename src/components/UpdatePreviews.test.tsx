@@ -5,6 +5,13 @@ import { APP_UPDATES } from "@/lib/app-updates";
 import { AppUpdatePreview } from "./UpdatePreviews";
 
 describe("release thumbnails", () => {
+  it("illustrates the Taskfloww app window and Dock icon without real actions", () => {
+    const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "desktop-app-dock" }));
+    expect(html).toContain("data-desktop-app-icon");
+    expect(html).toContain("Taskfloww");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("href=");
+  });
   it("illustrates the graphite menu with Quadro and a mind map, without the LA logo or real actions", () => {
     const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "graphite-redesign-board" }));
     expect(html).toContain("Quadro");
