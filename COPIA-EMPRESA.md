@@ -17,3 +17,7 @@ O tema começa em preto inclusive no login. O controle de tema permite alternar 
 ## Configuração verificada em 25/11/2026
 
 GitHub Pages publicado e tela de login verificada. As 211 migrações foram aplicadas ao projeto Supabase exclusivo, com 82 tabelas públicas e RLS habilitada em todas elas. A migração de visibilidade da equipe preserva a coluna de permissão sem transferir concessões de pessoas do sistema original. O endereço de retorno dos convites está configurado para a página de autenticação desta cópia.
+
+O administrador proprietário foi cadastrado e o login foi verificado nos ambientes Consultoria e Marketing. A função `admin-user-access` foi implantada no novo Supabase; ela valida a sessão com Supabase Auth e confere o papel de administrador antes de operar. A senha não faz parte dos arquivos do projeto.
+
+Verificação final: build estático aprovado, 131 testes pertinentes aprovados, publicação do Pages concluída e painel/atualizações conferidos em computador e celular. As integrações externas continuam dependendo de credenciais próprias.

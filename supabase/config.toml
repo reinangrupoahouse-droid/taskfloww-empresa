@@ -13,3 +13,7 @@ verify_jwt = false
 # botão "Enviar teste" do app (valida o JWT do próprio usuário no código).
 [functions.send-push]
 verify_jwt = false
+
+# A função valida o JWT e o papel de administrador com Supabase Auth.
+[functions.admin-user-access]
+verify_jwt = false
