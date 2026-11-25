@@ -97,6 +97,7 @@ export const APP_UPDATES: readonly AppUpdate[] = [
     details: [
       "Tema preto como padrão, com painéis em grafite, textos claros e destaques neutros no computador e no celular.",
       "A preferência de tema desta cópia é salva separadamente. O botão de modo claro continua disponível.",
+      "Esta cópia usa banco de dados próprio e acesso pelo GitHub Pages, com verificação de atualizações no endereço da Empresa.",
     ],
   },
   {

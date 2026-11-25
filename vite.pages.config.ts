@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vite";
 import { readFileSync } from "node:fs";
+import { appUpdatesPlugin } from "./scripts/app-updates-plugin";
 import { timbradoImagePlugin } from "./scripts/timbrado-image-plugin";
 
 // Pages has no application server: exclude server handlers and their secrets
@@ -33,7 +34,7 @@ export default defineConfig({
       "@tanstack/react-start": "/src/pages-react-start-stub.ts",
     },
   },
-  plugins: [staticServerFunctions, timbradoImagePlugin, react(), tailwindcss(), tsconfigPaths()],
+  plugins: [appUpdatesPlugin(), staticServerFunctions, timbradoImagePlugin, react(), tailwindcss(), tsconfigPaths()],
   build: {
     // Static files are generated here first, then scripts/prepare-gh-pages.mjs renames the entry file.
     outDir: ".gh-pages-dist",

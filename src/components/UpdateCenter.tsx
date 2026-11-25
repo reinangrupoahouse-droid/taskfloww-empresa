@@ -288,7 +288,7 @@ export function UpdateCenter() {
         };
         // Keep detecting installed workers even if the independent server check fails.
         const versionCheck = async () => {
-          const response = await fetch(`/app-release.json?check=${Date.now()}`, {
+          const response = await fetch(`${import.meta.env.BASE_URL}app-release.json?check=${Date.now()}`, {
             cache: "no-store",
             signal: AbortSignal.timeout(8_000),
           });
@@ -433,7 +433,7 @@ export function UpdateCenter() {
     setRefreshing(true);
 
     try {
-      const response = await fetch(`/app-release.json?check=${Date.now()}`, {
+      const response = await fetch(`${import.meta.env.BASE_URL}app-release.json?check=${Date.now()}`, {
         cache: "no-store",
         signal: AbortSignal.timeout(8_000),
       });
