@@ -13,3 +13,7 @@ GitHub Pages é publicado a partir da branch `gh-pages`, com `npm run deploy:pag
 Use `npm install` e `npm run dev` para desenvolvimento na porta 5187. Configure um `.env.local` próprio conforme `.env.example` para habilitar os serviços. Não coloque chaves administrativas em variáveis `VITE_*`.
 
 O tema começa em preto inclusive no login. O controle de tema permite alternar para o modo claro, com a preferência salva em `taskfloww-empresa-theme`.
+
+## Configuração verificada em 25/11/2026
+
+GitHub Pages publicado e tela de login verificada. As 211 migrações foram aplicadas ao projeto Supabase exclusivo, com 82 tabelas públicas e RLS habilitada em todas elas. A migração de visibilidade da equipe preserva a coluna de permissão sem transferir concessões de pessoas do sistema original. O endereço de retorno dos convites está configurado para a página de autenticação desta cópia.
