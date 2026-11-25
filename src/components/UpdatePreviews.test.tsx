@@ -5,6 +5,13 @@ import { APP_UPDATES } from "@/lib/app-updates";
 import { AppUpdatePreview } from "./UpdatePreviews";
 
 describe("release thumbnails", () => {
+  it("shows tags chosen while creating a task, without real actions", () => {
+    const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "tags-on-create" }));
+    expect(html).toContain('data-tag-on-create="selected"');
+    expect(html).toContain("Nova tag");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("href=");
+  });
   it("shows active filters outside the panel and the hidden new task notice, without real actions", () => {
     const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "visible-active-filters" }));
     expect(html).toContain("data-active-filter-chip");

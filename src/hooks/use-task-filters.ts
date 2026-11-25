@@ -28,6 +28,13 @@ function readStored(key: string): TaskFilterValue | null {
   }
 }
 
+/** Tags do filtro salvo agora (para a tarefa nova já nascer visível no filtro). */
+export function readSavedFilterTags(userId?: string | null, workspaceId?: string | null): string[] {
+  if (typeof window === "undefined") return [];
+  const tags = readStored(filtersKey(userId, workspaceId))?.tags;
+  return Array.isArray(tags) ? tags.filter((tag): tag is string => typeof tag === "string") : [];
+}
+
 export function usePersistentTaskFilters(
   initial: () => TaskFilterValue,
   /** preferInitial: um link explícito (ex.: ?mine=1) vale mais que o filtro salvo. */

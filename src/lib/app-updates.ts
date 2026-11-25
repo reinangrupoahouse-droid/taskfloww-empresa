@@ -2,6 +2,7 @@ import { canManageMarketingAccess } from "./environment-access";
 
 export type UpdateWorkspace = "marketing" | "consultoria";
 export type UpdatePreviewKind =
+  | "tags-on-create"
   | "visible-active-filters"
   | "update-fresh-page"
   | "tag-filter-saved"
@@ -93,6 +94,19 @@ export type AppUpdate = {
 // Keep newest first. The first visible entry determines the update notice and
 // acknowledgement key, so a release is registered once, not in several screens.
 export const APP_UPDATES: readonly AppUpdate[] = [
+  {
+    id: "tags-na-criacao-2026-11-25",
+    title: "Escolha as tags ao criar a tarefa",
+    date: "2026-11-25",
+    preview: "tags-on-create",
+    audience: "all",
+    workspaces: ["consultoria"],
+    details: [
+      "Na nova tarefa há o campo Tags: marque uma ou mais, ou crie uma tag nova com cor ali mesmo.",
+      "Se um filtro de tag estiver ligado (por exemplo, Consultoria), a tarefa nova já vem com essa tag marcada, para continuar aparecendo depois de salvar. Dá para desmarcar antes de salvar.",
+      "Na Lista, a bolinha antes do nome da tarefa saiu.",
+    ],
+  },
   {
     id: "filtros-ativos-a-vista-2026-11-25",
     title: "Filtros ativos sempre à vista",

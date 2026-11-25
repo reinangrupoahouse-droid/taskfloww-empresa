@@ -1882,6 +1882,25 @@ function MobileTasksPushPreview() {
   );
 }
 
+function TagsOnCreatePreview() {
+  // Ilustração estática do formulário de nova tarefa com tags marcadas.
+  return (
+    <div role="img" aria-label="Prévia do campo Tags na criação da tarefa" className="space-y-2 rounded-xl border bg-card p-3 text-[10px]">
+      <div className="rounded-md border bg-background px-2 py-1.5 font-medium">Revisar contrato da farmácia</div>
+      <p className="font-semibold text-muted-foreground">Tags</p>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span data-tag-on-create="selected" className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold text-white" style={{ background: "#3b74b0" }}>
+          <Check className="h-2.5 w-2.5" aria-hidden="true" /> Consultoria
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-muted-foreground">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#b5524f" }} /> Urgente
+        </span>
+        <span className="rounded-full border border-dashed px-2 py-0.5 text-muted-foreground">+ Nova tag</span>
+      </div>
+    </div>
+  );
+}
+
 function VisibleActiveFiltersPreview() {
   // Ilustração estática dos filtros ativos à vista e do aviso de tarefa escondida.
   return (
@@ -2092,6 +2111,7 @@ function EmpresaBlackPreview() {
 }
 
 const UPDATE_PREVIEWS: Record<UpdatePreviewKind, () => ReactNode> = {
+  "tags-on-create": TagsOnCreatePreview,
   "visible-active-filters": VisibleActiveFiltersPreview,
   "update-fresh-page": UpdateFreshPagePreview,
   "tag-filter-saved": TagFilterSavedPreview,

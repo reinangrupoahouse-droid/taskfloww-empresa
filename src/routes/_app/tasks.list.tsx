@@ -583,7 +583,7 @@ function ListPage() {
                     setOpen(true);
                   }}
                 >
-                  <td className="px-2 py-2 font-medium"><div className="flex items-center gap-2"><span aria-hidden="true" className="tf-status-dot h-2 w-2 shrink-0 rounded-full" style={{ color: displayStatus?.color ?? "#6b7280", backgroundColor: displayStatus?.color ?? "#6b7280" }} /><TaskPinButton task={t} compact /><span className="block min-w-0 break-words [overflow-wrap:anywhere]"><LinkedText text={t.title} /></span></div>{t.is_draft && <span className="text-[10px] font-semibold text-amber-700">Em elaboração</span>}</td>
+                  <td className="px-2 py-2 font-medium"><div className="flex items-center gap-2"><TaskPinButton task={t} compact /><span className="block min-w-0 break-words [overflow-wrap:anywhere]"><LinkedText text={t.title} /></span></div>{t.is_draft && <span className="text-[10px] font-semibold text-amber-700">Em elaboração</span>}</td>
                   <td className="px-2 py-2">
                     <div className="flex flex-wrap gap-1">{client ? (
                       <ClientChip name={client.name} color={client.color} />

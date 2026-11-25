@@ -66,6 +66,8 @@ import { FileDropZone } from "@/components/FileDropZone";
 import { isTaskAttachmentTooLarge, MAX_TASK_ATTACHMENT_LABEL } from "@/lib/attachment-limits";
 import { removeTaskAttachmentAndClientCopy } from "@/lib/sync-task-attachment-to-client";
 import { createTaskFileSaver } from "@/lib/task-file-save";
+import { TagChipsPicker } from "@/components/TaskListExtras";
+import { readSavedFilterTags } from "@/hooks/use-task-filters";
 import { RichTextEditor, type PastedEditorImage } from "@/components/RichTextEditor";
 import {
   attachImagesToDescription,
@@ -336,6 +338,8 @@ export function TaskDialog({
   const [status, setStatus] = useState<Task["status"]>("todo");
   const [priority, setPriority] = useState<Task["priority"]>("medium");
   const [categoryId, setCategoryId] = useState("");
+  /** Tags escolhidas ao criar a tarefa (gravadas em task_tag_links depois do insert). */
+  const [newTagIds, setNewTagIds] = useState<string[]>([]);
   const [objectiveId, setObjectiveId] = useState("");
   const [columnId, setColumnId] = useState<string>("");
   const [clientId, setClientId] = useState<string>("");
@@ -630,6 +634,9 @@ export function TaskDialog({
       setStatus("todo");
       setPriority(defaults?.priority ?? "medium");
       setCategoryId("");
+      // Com um filtro de tag ligado, a tarefa nova já vem com essa tag e não
+      // "some" da tela ao ser salva. A pessoa pode desmarcar antes de salvar.
+      setNewTagIds(readSavedFilterTags(user?.id, defaultWorkspaceId || activeWorkspace?.id));
       setObjectiveId("");
       setColumnId(defaultColumnId ?? "");
       setTargetWorkspaceId(defaultWorkspaceId || activeWorkspace?.id || "");
@@ -893,7 +900,12 @@ export function TaskDialog({
       completed_at: status === "done" ? completionDateToIso(completionDate) : null,
       // Marketing uses one category per task. Other environments keep their
       // current primary label untouched when a task is edited.
-      tag_id: showMarketingClassification ? categoryId || null : task?.tag_id ?? null,
+      // Tarefa nova: a primeira tag escolhida vira a tag principal (como no card).
+      tag_id: showMarketingClassification
+        ? categoryId || null
+        : task
+          ? task.tag_id ?? null
+          : newTagIds[0] ?? null,
       objective_id: showMarketingClassification ? objectiveId || null : task?.objective_id ?? null,
     };
   };
@@ -1384,6 +1396,14 @@ export function TaskDialog({
           authenticated.client.from("task_history").insert({ task_id: taskId, user_id: authenticated.user.id, action: "created" }),
           syncCollaborators(taskId, authenticated.client),
         ]);
+        if (!showMarketingClassification && newTagIds.length) {
+          const { error: tagError } = await authenticated.client
+            .from("task_tag_links")
+            .insert(newTagIds.map((tagId) => ({ task_id: taskId, tag_id: tagId })));
+          if (tagError) toast.error("A tarefa foi criada, mas as tags não foram salvas. Adicione pela Lista ou pelo card.");
+          void qc.invalidateQueries({ queryKey: ["task_card_related"] });
+          void qc.invalidateQueries({ queryKey: ["task_tag_filter"] });
+        }
         if (!(await commitMarketingSubtasks(taskId))) return;
         if (!(await commitPendingSubtask(taskId, false))) return;
       }
@@ -2628,6 +2648,13 @@ export function TaskDialog({
               </button>
             ) : null}
           </div>
+
+          {!task && !currentTaskId && !showMarketingClassification && (
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <TagChipsPicker tags={marketingCategories} selected={newTagIds} onChange={setNewTagIds} />
+            </div>
+          )}
 
           {(!task || isDraft) && (
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/15 px-3 py-2">

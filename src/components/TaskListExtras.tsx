@@ -356,3 +356,150 @@ export function ClientChip({ name, color }: { name: string; color?: string | nul
     </span>
   );
 }
+
+/**
+ * Seletor de tags do formulário de nova tarefa: marca várias tags e cria uma
+ * tag nova (com cor) sem sair do formulário. Só altera a seleção; quem chama
+ * grava os vínculos depois que a tarefa existir.
+ */
+export function TagChipsPicker({
+  tags,
+  selected,
+  onChange,
+}: {
+  tags: ListTag[];
+  selected: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const [newName, setNewName] = useState("");
+  const [newColor, setNewColor] = useState(NEW_TAG_COLORS[0]);
+  const [creating, setCreating] = useState(false);
+  const [adding, setAdding] = useState(false);
+
+  const toggle = (id: string) =>
+    onChange(selected.includes(id) ? selected.filter((tagId) => tagId !== id) : [...selected, id]);
+
+  const create = async () => {
+    const name = newName.trim();
+    if (!name || creating || !user?.id) return;
+    const existing = tags.find((tag) => tag.name.trim().toLowerCase() === name.toLowerCase());
+    if (existing) {
+      if (!selected.includes(existing.id)) onChange([...selected, existing.id]);
+      setNewName("");
+      setAdding(false);
+      return;
+    }
+    setCreating(true);
+    try {
+      const { data, error } = await supabase
+        .from("task_tags")
+        .insert({ name, color: newColor, created_by: user.id, position: tags.length })
+        .select("id")
+        .single();
+      if (error) throw error;
+      await qc.invalidateQueries({ queryKey: ["task_tags"] });
+      if (data?.id) onChange([...selected, data.id]);
+      setNewName("");
+      setAdding(false);
+      toast.success(`Tag “${name}” criada`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível criar a tag.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {tags.map((tag) => {
+          const active = selected.includes(tag.id);
+          return (
+            <button
+              key={tag.id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => toggle(tag.id)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-[background-color,border-color,color,transform] duration-150 active:scale-95 ${
+                active
+                  ? "border-transparent shadow-sm"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+              style={active ? { background: tag.color, color: readableText(tag.color) } : undefined}
+            >
+              {active ? (
+                <Check className="h-3 w-3" />
+              ) : (
+                <span className="h-2 w-2 rounded-full" style={{ background: tag.color }} />
+              )}
+              {tag.name}
+            </button>
+          );
+        })}
+        {!adding && (
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="inline-flex items-center gap-1 rounded-full border border-dashed px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <Plus className="h-3 w-3" /> Nova tag
+          </button>
+        )}
+      </div>
+      {adding && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/30 p-2">
+          <input
+            autoFocus
+            value={newName}
+            onChange={(event) => setNewName(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                void create();
+              }
+              if (event.key === "Escape") {
+                event.stopPropagation();
+                setAdding(false);
+              }
+            }}
+            placeholder="Nome da tag"
+            aria-label="Nome da nova tag"
+            maxLength={40}
+            className="h-8 min-w-0 flex-1 rounded-md border bg-background px-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
+          <div className="flex items-center gap-1.5" role="radiogroup" aria-label="Cor da nova tag">
+            {NEW_TAG_COLORS.map((color) => (
+              <button
+                key={color}
+                type="button"
+                role="radio"
+                aria-checked={newColor === color}
+                aria-label={`Cor ${color}`}
+                onClick={() => setNewColor(color)}
+                className={`h-5 w-5 rounded-full transition-transform active:scale-90 ${newColor === color ? "ring-2 ring-ring ring-offset-2 ring-offset-background" : ""}`}
+                style={{ background: color }}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            disabled={!newName.trim() || creating}
+            onClick={() => void create()}
+            className="inline-flex h-8 items-center gap-1 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition-transform active:scale-95 disabled:opacity-50"
+          >
+            {creating ? "Criando…" : "Criar"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setAdding(false)}
+            className="h-8 rounded-md px-2 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
