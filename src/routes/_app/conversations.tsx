@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -45,6 +45,11 @@ import {
 } from "@/components/ui/context-menu";
 
 export const Route = createFileRoute("/_app/conversations")({
+  beforeLoad: () => {
+    // Aba removida do Taskfloww Empresa; links antigos voltam ao painel.
+    throw redirect({ to: "/dashboard" });
+  },
+  
   validateSearch: (search: Record<string, unknown>): { task?: string } => ({
     task: typeof search.task === "string" ? search.task : undefined,
   }),

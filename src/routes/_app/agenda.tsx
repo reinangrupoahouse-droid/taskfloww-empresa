@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import {
   useEffect,
   useMemo,
@@ -46,7 +46,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { buildEventLayouts } from "@/lib/calendar-event-layout";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_app/agenda")({ component: AgendaPage });
+export const Route = createFileRoute("/_app/agenda")({
+  beforeLoad: () => {
+    // Aba removida do Taskfloww Empresa; links antigos voltam ao painel.
+    throw redirect({ to: "/dashboard" });
+  },
+  component: AgendaPage });
 
 const DAY_START_HOUR = 0;
 const DAY_END_HOUR = 24;

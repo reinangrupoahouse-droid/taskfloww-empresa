@@ -1123,7 +1123,7 @@ export function TaskCard({
       <>
       <div
         {...dragHandleProps}
-        className="group flex min-h-[132px] w-full cursor-grab touch-none flex-col overflow-hidden rounded-[0.75rem] border bg-card shadow-sm transition hover:border-primary/40 hover:shadow active:cursor-grabbing"
+        className="tf-card tf-spot group relative flex min-h-[132px] w-full cursor-grab touch-none flex-col overflow-hidden rounded-[0.85rem] border bg-card active:cursor-grabbing"
         title={task.title || "Sem título"}
       >
         <div
@@ -1246,7 +1246,7 @@ export function TaskCard({
       <div
         {...dragHandleProps}
         className={cn(
-          "group relative flex min-h-[420px] w-full cursor-grab touch-none flex-col overflow-visible rounded-[0.75rem] border bg-card shadow-sm transition hover:border-primary/40 hover:shadow active:cursor-grabbing",
+          "tf-card tf-spot group relative flex min-h-[420px] w-full cursor-grab touch-none flex-col overflow-visible rounded-[0.85rem] border bg-card active:cursor-grabbing",
         )}
       >
         {/* Client color strip at top */}
@@ -1254,7 +1254,7 @@ export function TaskCard({
           <div
             className={cn(
               "flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider",
-              "rounded-t-[0.75rem]",
+              "rounded-t-[0.8rem] shadow-[inset_0_-1px_0_rgb(0_0_0/0.12),inset_0_1px_0_rgb(255_255_255/0.25)]",
             )}
             style={{ background: client.color, color: clientText }}
           >

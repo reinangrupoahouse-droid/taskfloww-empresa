@@ -1881,6 +1881,51 @@ function MobileTasksPushPreview() {
   );
 }
 
+function GraphiteRedesignBoardPreview() {
+  // Ilustração estática: menu grafite sem logotipo externo, com a aba Quadro
+  // ativa e um pequeno mapa mental. Nada aqui executa ações reais.
+  const nav = ["Mural", "Dashboard", "Minhas Tarefas", "Quadro", "Clientes", "CRM"];
+  return (
+    <div
+      role="img"
+      aria-label="Prévia do novo visual grafite com a aba Quadro e um mapa mental"
+      className="grid grid-cols-[96px_1fr] overflow-hidden rounded-xl border border-[#2a2f36] bg-[#0e1013] text-[#e8eaed]"
+    >
+      <div className="space-y-1 border-r border-[#1f2329] bg-gradient-to-b from-[#121418] to-[#0a0b0e] p-2">
+        <div className="mb-2 flex items-center gap-1.5 px-1">
+          <span className="h-4 w-4 rounded-[5px] bg-gradient-to-br from-[#474d56] to-[#1c1f24] shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]" />
+          <span className="text-[9px] font-semibold tracking-tight">Taskfloww</span>
+        </div>
+        {nav.map((label) => (
+          <div
+            key={label}
+            className={`flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[8px] ${label === "Quadro" ? "border border-white/10 bg-[#23272d] font-medium" : "text-[#9aa1ab]"}`}
+          >
+            <span className={`h-2.5 w-2.5 rounded-[3px] ${label === "Quadro" ? "bg-gradient-to-br from-[#eef0f3] to-[#a9b0ba]" : "bg-[#2a2f36]"}`} />
+            {label}
+          </div>
+        ))}
+      </div>
+      <div
+        className="relative h-40 bg-[#0e1013]"
+        style={{ backgroundImage: "radial-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1.2px)", backgroundSize: "12px 12px" }}
+      >
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 240 160" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M 118 80 C 140 80, 140 42, 160 42" fill="none" stroke="#9aa1ab" strokeWidth="1.2" />
+          <path d="M 118 80 C 140 80, 140 80, 160 80" fill="none" stroke="#9aa1ab" strokeWidth="1.2" />
+          <path d="M 118 80 C 140 80, 140 118, 160 118" fill="none" stroke="#9aa1ab" strokeWidth="1.2" />
+          <path d="M 62 80 C 48 80, 48 118, 34 118" fill="none" stroke="#9aa1ab" strokeWidth="1.2" />
+        </svg>
+        <span className="absolute left-[26%] top-1/2 -translate-y-1/2 rounded-lg border border-[#4a515c] bg-[#2b3038] px-2 py-1 text-[9px] font-semibold">Plano 2027</span>
+        <span className="absolute left-[67%] top-[20%] rounded-md border border-[#c3c9d1] bg-[#e6e9ed] px-1.5 py-0.5 text-[8px] font-medium text-[#1b1f24]">Clientes</span>
+        <span className="absolute left-[67%] top-[44%] rounded-md border border-[#aec6e0] bg-[#d4e3f2] px-1.5 py-0.5 text-[8px] font-medium text-[#16283b]">Equipe</span>
+        <span className="absolute left-[67%] top-[68%] rounded-md border border-[#afcdb8] bg-[#d4e7d9] px-1.5 py-0.5 text-[8px] font-medium text-[#1d3325]">Metas</span>
+        <span className="absolute left-[3%] top-[62%] w-14 rotate-[-2deg] rounded-[3px] bg-[#f3e6b8] p-1 text-[7px] leading-tight text-[#3a2f10] shadow">Revisar contratos</span>
+      </div>
+    </div>
+  );
+}
+
 function EmpresaBlackPreview() {
   return <div aria-label="Prévia do Taskfloww Empresa em preto" className="grid grid-cols-[70px_1fr] overflow-hidden rounded-xl border border-neutral-700 bg-neutral-950 text-neutral-100">
     <div className="space-y-3 border-r border-neutral-800 bg-neutral-900 p-3"><span className="font-bold">T</span><LayoutDashboard className="h-4 w-4" /><ListTodo className="h-4 w-4" /><CalendarDays className="h-4 w-4" /></div>
@@ -1889,6 +1934,7 @@ function EmpresaBlackPreview() {
 }
 
 const UPDATE_PREVIEWS: Record<UpdatePreviewKind, () => ReactNode> = {
+  "graphite-redesign-board": GraphiteRedesignBoardPreview,
   "empresa-black": EmpresaBlackPreview,
   "mobile-tasks-push": MobileTasksPushPreview,
   "subtask-enter-next-row": SubtaskEnterNextRowPreview,

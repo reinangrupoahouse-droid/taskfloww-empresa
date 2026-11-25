@@ -17,6 +17,7 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  defaultDropAnimationSideEffects,
   useDroppable,
   closestCenter,
   getFirstCollision,
@@ -146,8 +147,8 @@ function SortableTaskCard({
   });
   const style = {
     transform: CSS.Translate.toString(transform),
-    transition: transition ?? "transform 180ms cubic-bezier(0.2, 0, 0, 1)",
-    opacity: isDragging ? 0.4 : 1,
+    transition: transition ?? "transform 260ms cubic-bezier(0.23, 1, 0.32, 1)",
+    opacity: isDragging ? 0.35 : 1,
     willChange: "transform",
   } as CSSProperties;
 
@@ -155,11 +156,11 @@ function SortableTaskCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={
+      className={`${
         minimal
           ? "w-[clamp(15rem,18vw,19rem)] max-w-full min-w-0 shrink-0"
           : "w-72 max-w-full min-w-0 shrink-0"
-      }
+      } ${isDragging ? "tf-drag-ghost" : ""}`}
     >
       <TaskCard
         task={task}
@@ -211,20 +212,19 @@ function CompletedColumn({
       <button
         type="button"
         onClick={onOpenChange}
-        className="mb-2 flex w-full items-center gap-1.5 rounded px-1 text-left hover:bg-muted/50"
+        className="mb-2 flex w-full items-center gap-2 rounded-lg px-1.5 py-1 text-left transition-colors hover:bg-muted/60"
+        style={{ ["--col-color" as string]: "#3fa37a" } as CSSProperties}
       >
-        <span className="h-3 w-3 rounded-full bg-emerald-500 dark:bg-emerald-400 dark:ring-2 dark:ring-emerald-200/40 dark:shadow-[0_0_12px_rgba(74,222,128,0.7)]" />
-        <h3 className="font-semibold">{title}</h3>
-        <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-900 dark:bg-emerald-400/25 dark:text-emerald-100 dark:ring-1 dark:ring-emerald-200/45 dark:shadow-[0_0_10px_rgba(74,222,128,0.32)]">
-          {count}
-        </span>
+        <span className="tf-col-dot h-2.5 w-2.5 rounded-full bg-[#3fa37a]" />
+        <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+        <span className="tf-col-count">{count}</span>
         {!isH && open && (
           <span className="ml-2 text-xs text-muted-foreground">
             Arraste tarefas aqui para concluir
           </span>
         )}
         <ChevronDown
-          className={`ml-auto h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`}
+          className={`ml-auto h-4 w-4 text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${open ? "" : "-rotate-90"}`}
         />
       </button>
       <SortableContext
@@ -233,14 +233,15 @@ function CompletedColumn({
       >
         <div
           ref={setNodeRef}
-          className={`rounded-lg border-2 border-solid p-2 transition ${
+          data-over={isOver}
+          className={`tf-column p-2 ${
             open
               ? isH
-                ? "flex flex-col gap-2"
-                : "flex flex-nowrap items-start gap-2 overflow-x-auto pb-2"
+                ? "flex flex-col gap-2.5"
+                : "flex flex-nowrap items-start gap-2.5 overflow-x-auto pb-2"
               : "flex items-center justify-center"
-          } ${isOver ? "border-emerald-500 bg-emerald-500/10" : "border-emerald-500/30 bg-emerald-500/5"}`}
-          style={{ minHeight: open ? (isH ? 200 : 120) : 42 }}
+          }`}
+          style={{ minHeight: open ? (isH ? 200 : 120) : 42, ["--col-color" as string]: "#3fa37a" } as CSSProperties}
         >
           {open ? (
             children
@@ -300,8 +301,8 @@ function SortableColumn({
           : "flex w-full flex-col"
       }
     >
-      <div className="mb-2 flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
+      <div className="mb-2 flex items-center justify-between px-1" style={{ ["--col-color" as string]: col.color || "#6b7280" } as CSSProperties}>
+        <div className="flex items-center gap-2">
           {canManage && (
             <span
               {...attributes}
@@ -313,17 +314,11 @@ function SortableColumn({
             </span>
           )}
           <span
-            className="h-3 w-3 rounded-full dark:ring-2 dark:ring-white/45 dark:shadow-[0_0_12px_rgba(255,255,255,0.32)]"
-            style={{ background: col.color || "#1e3a8a" }}
+            className="tf-col-dot h-2.5 w-2.5 rounded-full"
+            style={{ background: col.color || "#6b7280" }}
           />
-          <h3 className="font-semibold">{col.name}</h3>
-          <span
-            className="rounded-full px-2 py-0.5 text-xs font-semibold dark:ring-1 dark:ring-white/45 dark:shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-            style={{
-              color: "var(--foreground)",
-              backgroundColor: `${col.color || "#1e3a8a"}40`,
-            }}
-          >
+          <h3 className="text-sm font-semibold tracking-tight">{col.name}</h3>
+          <span key={count} className="tf-col-count tf-badge-pop">
             {count}
           </span>
         </div>
@@ -367,13 +362,14 @@ function SortableColumn({
       >
         <div
           ref={setDropRef}
-          className={`rounded-lg border-2 border-solid border-l-4 p-2 transition ${
+          data-over={isOver}
+          className={`tf-column p-2 ${
             isH ? "flex flex-col gap-3" : "flex flex-nowrap items-start gap-4 overflow-x-auto pb-2"
-          } ${isOver ? "border-primary bg-primary/5" : "border-transparent bg-muted/40"}`}
+          }`}
           style={{
             minHeight: isH ? 200 : 120,
-            borderLeftColor: col.color || "#1e3a8a",
-          }}
+            ["--col-color" as string]: col.color || "#6b7280",
+          } as CSSProperties}
         >
           {children}
         </div>
@@ -1534,7 +1530,7 @@ function KanbanPage() {
                     canManage={isAdmin}
                   >
                     {colTasks.map((t) => (
-                      pendingTaskIds.has(t.id) ? <div key={t.id} aria-busy="true" className="rounded-md border bg-card px-3 py-2 text-sm">
+                      pendingTaskIds.has(t.id) ? <div key={t.id} aria-busy="true" className="w-72 animate-pulse rounded-xl border bg-card px-3 py-2 text-sm">
                         {t.title} <span className="text-xs text-muted-foreground">Salvando…</span>
                       </div> : <SortableTaskCard
                         key={t.id}
@@ -1614,9 +1610,15 @@ function KanbanPage() {
               </CompletedColumn>
             </div>
           </SortableContext>
-          <DragOverlay>
+          <DragOverlay
+            dropAnimation={{
+              duration: 280,
+              easing: "cubic-bezier(0.23, 1, 0.32, 1)",
+              sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: "0.35" } } }),
+            }}
+          >
             {activeTask && (
-              <div className="rotate-2 opacity-90">
+              <div className="tf-drag-overlay">
                 <TaskCard
                   task={activeTask}
                   clients={clients}

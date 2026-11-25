@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Supabase types are regenerated after the migration is applied. */
-import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, differenceInCalendarDays, format } from "date-fns";
@@ -84,6 +84,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_app/meetings")({
+  beforeLoad: () => {
+    // Aba removida do Taskfloww Empresa; links antigos voltam ao painel.
+    throw redirect({ to: "/dashboard" });
+  },
+  
   // ?meeting=<id> abre a reunião direto (usado pelos avisos do sininho e do pop-up).
   validateSearch: (search: Record<string, unknown>): { meeting?: string } => ({
     meeting: typeof search.meeting === "string" ? search.meeting : undefined,

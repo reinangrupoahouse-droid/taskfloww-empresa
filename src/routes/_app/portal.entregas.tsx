@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameMonth, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -12,7 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export const Route = createFileRoute("/_app/portal/entregas")({ component: ClientDeliveriesPage });
+export const Route = createFileRoute("/_app/portal/entregas")({
+  beforeLoad: () => {
+    // Aba removida do Taskfloww Empresa; links antigos voltam ao painel.
+    throw redirect({ to: "/dashboard" });
+  },
+  component: ClientDeliveriesPage });
 
 function ClientDeliveriesPage() {
   const { data: clients = [] } = useClients();

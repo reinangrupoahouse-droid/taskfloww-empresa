@@ -5,6 +5,16 @@ import { APP_UPDATES } from "@/lib/app-updates";
 import { AppUpdatePreview } from "./UpdatePreviews";
 
 describe("release thumbnails", () => {
+  it("illustrates the graphite menu with Quadro and a mind map, without the LA logo or real actions", () => {
+    const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "graphite-redesign-board" }));
+    expect(html).toContain("Quadro");
+    expect(html).toContain("Mural");
+    expect(html).not.toContain("Mural LA");
+    expect(html).not.toMatch(/Business Mentoring|Consultoria|Conversas|Obrigações|Reuniões/);
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("href=");
+  });
   it("illustrates the phone task list and + button, without push or real actions", () => {
     const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "mobile-tasks-push" }));
     expect(html).toContain("data-mobile-tasks-phone");

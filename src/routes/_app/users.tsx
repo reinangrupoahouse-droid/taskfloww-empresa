@@ -36,7 +36,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 export const Route = createFileRoute("/_app/users")({ component: UsersPage });
 
 const ACCESS_OPTIONS = [
-  ["mural", "Mural LA"],
+  ["mural", "Mural"],
   ["dashboard", "Dashboard"],
   ["tasks", "Minhas Tarefas"],
   ["conversations", "Conversas"],

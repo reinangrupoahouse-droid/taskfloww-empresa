@@ -7,7 +7,7 @@ import {
 
 describe("application release catalogue", () => {
   it("requires a unique version, date, explanation and preview for every release", () => {
-    expect(APP_UPDATES).toHaveLength(39);
+    expect(APP_UPDATES).toHaveLength(40);
     expect(new Set(APP_UPDATES.map((update) => update.id)).size).toBe(APP_UPDATES.length);
     for (const update of APP_UPDATES) {
       expect(update.id.trim()).not.toBe("");
@@ -31,16 +31,19 @@ describe("application release catalogue", () => {
     expect(marketing).toHaveLength(5);
     expect(consultoria).toHaveLength(5);
     expect(marketing[0].id).toBe("taskfloww-empresa-preto-2026-11-25");
-    for (const feed of [marketing, consultoria, ownerMarketing, ownerConsultoria]) {
+    for (const feed of [marketing, ownerMarketing]) {
       expect(feed.filter((update) => update.date === "2026-11-25")).toEqual([marketing[0]]);
     }
-    expect(consultoria[0].title).toBe("Taskfloww Empresa com visual preto");
-    expect(consultoria[1].id).toBe("manutencao-2026-11-24");
+    // A cópia Empresa só usa o ambiente principal: o novo visual aparece primeiro nele.
+    expect(consultoria[0].id).toBe("visual-grafite-e-quadro-2026-11-25");
+    expect(consultoria[1].title).toBe("Taskfloww Empresa com visual preto");
+    expect(consultoria[2].id).toBe("manutencao-2026-11-24");
     expect(consultoria.some((update) => update.id === "painel-lateral-de-criacao-marketing-2026-10-22")).toBe(false);
     expect(APP_UPDATES.find((update) => update.id === "painel-lateral-de-criacao-marketing-2026-10-22")?.workspaces).toContain("marketing");
     expect(consultoria.some((update) => update.id === "painel-lateral-de-criacao-marketing-2026-10-22")).toBe(false);
     expect(ownerMarketing[0].id).toBe(marketing[0].id);
-    expect(ownerConsultoria[0].id).toBe(ownerMarketing[0].id);
+    expect(ownerConsultoria[0].id).toBe("visual-grafite-e-quadro-2026-11-25");
+    expect(ownerConsultoria[1].id).toBe(ownerMarketing[0].id);
     // This older private release is now outside the five most recent updates.
     expect(ownerMarketing).toHaveLength(5);
     expect(marketing.some((update) => update.id === "whatsapp-varias-conversas-2026-11-10")).toBe(false);
@@ -66,14 +69,15 @@ describe("application release catalogue", () => {
   it("shows the phone release only on phones, never on the desktop", () => {
     for (const workspace of ["marketing", "consultoria"]) {
       const phone = getVisibleAppUpdates(false, workspace, undefined, true);
-      expect(phone[1].id).toBe("tarefas-no-celular-2026-11-24");
-      expect(phone[1].title).toContain("celular");
+      const offset = workspace === "consultoria" ? 1 : 0;
+      expect(phone[1 + offset].id).toBe("tarefas-no-celular-2026-11-24");
+      expect(phone[1 + offset].title).toContain("celular");
       // Push ainda depende de configuração no servidor: não anunciar antes.
-      expect(phone[1].details.join(" ")).not.toMatch(/notifica|avisos no celular/i);
+      expect(phone[1 + offset].details.join(" ")).not.toMatch(/notifica|avisos no celular/i);
       expect(phone).toHaveLength(5);
       const desktop = getVisibleAppUpdates(false, workspace);
       expect(desktop.some((update) => update.id === "tarefas-no-celular-2026-11-24")).toBe(false);
-      expect(desktop[0].id).toBe("taskfloww-empresa-preto-2026-11-25");
+      expect(desktop[0].id).toBe(workspace === "consultoria" ? "visual-grafite-e-quadro-2026-11-25" : "taskfloww-empresa-preto-2026-11-25");
     }
   });
 

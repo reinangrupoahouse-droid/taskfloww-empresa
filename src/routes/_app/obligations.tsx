@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Supabase types are regenerated after the migration is applied. */
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, redirect } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -102,7 +102,12 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const Route = createFileRoute("/_app/obligations")({ component: ObligationsPage });
+export const Route = createFileRoute("/_app/obligations")({
+  beforeLoad: () => {
+    // Aba removida do Taskfloww Empresa; links antigos voltam ao painel.
+    throw redirect({ to: "/dashboard" });
+  },
+  component: ObligationsPage });
 
 const todayKey = () => format(new Date(), "yyyy-MM-dd");
 

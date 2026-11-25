@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { rememberTaskView, type TaskView } from "@/lib/task-view-preference";
 import { taskClientIds } from "@/lib/task-clients";
@@ -60,6 +60,42 @@ function TasksLayout() {
     { to: "/tasks/calendar", label: "Calendário", icon: CalIcon },
   ] as const;
   const compactToolbar = pathname.startsWith("/tasks/list");
+  // Pílula metálica que desliza até a visão ativa.
+  const segRef = useRef<HTMLDivElement | null>(null);
+  const [seg, setSeg] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  useLayoutEffect(() => {
+    const measure = () => {
+      const active = segRef.current?.querySelector<HTMLElement>("[data-seg-active='true']");
+      setSeg(active ? { x: active.offsetLeft, y: active.offsetTop, w: active.offsetWidth, h: active.offsetHeight } : null);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [pathname]);
+  // Ao trocar entre Kanban, Lista e Calendário o conteúdo entra deslizando
+  // no sentido da visão escolhida.
+  const viewRef = useRef<HTMLDivElement | null>(null);
+  const previousView = useRef(pathname);
+  useEffect(() => {
+    const order = ["/tasks/kanban", "/tasks/list", "/tasks/calendar"];
+    const from = order.findIndex((path) => previousView.current.startsWith(path));
+    const to = order.findIndex((path) => pathname.startsWith(path));
+    previousView.current = pathname;
+    if (from === -1 || to === -1 || from === to) return;
+    const el = viewRef.current;
+    if (!el || typeof el.animate !== "function") return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const dx = to > from ? 18 : -18;
+    el.animate(
+      reduce
+        ? [{ opacity: 0.4 }, { opacity: 1 }]
+        : [
+            { opacity: 0, transform: `translateX(${dx}px)` },
+            { opacity: 1, transform: "none" },
+          ],
+      { duration: reduce ? 150 : 340, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
+    );
+  }, [pathname]);
   return (
     <div className="flex flex-col">
       <div className={`sticky top-0 z-30 flex min-w-0 flex-wrap items-center border-b bg-background/95 px-4 backdrop-blur sm:px-6 ${compactToolbar ? "gap-2 py-1.5" : "gap-3 py-2.5"}`}>
@@ -87,10 +123,14 @@ function TasksLayout() {
           )}
         </div>
         <div className="flex w-full min-w-0 items-center gap-3 overflow-x-auto sm:ml-auto sm:w-auto">
-          <span className="hidden shrink-0 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:inline">
-            Visualizar
-          </span>
-          <div className="flex w-full min-w-0 rounded-md border bg-muted/35 p-0.5 sm:inline-flex sm:w-auto sm:shrink-0">
+          <div ref={segRef} className="tf-seg flex w-full min-w-0 rounded-[0.7rem] border bg-muted/50 p-[3px] sm:inline-flex sm:w-auto sm:shrink-0">
+            {seg && (
+              <span
+                aria-hidden="true"
+                className="tf-seg-indicator"
+                style={{ transform: `translate(${seg.x}px, ${seg.y}px)`, width: seg.w, height: seg.h }}
+              />
+            )}
             {views.map((v) => {
               const active = pathname === v.to || pathname.startsWith(v.to + "/");
               const Icon = v.icon;
@@ -99,10 +139,10 @@ function TasksLayout() {
                   key={v.to}
                   to={v.to}
                   onClick={() => rememberTaskView(v.to.split("/").pop() as TaskView, user?.id, activeWorkspace?.id)}
-                  className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-sm px-1 py-1.5 text-center text-xs leading-tight transition sm:flex-none sm:gap-2 sm:px-3 sm:text-sm ${
-                    active
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                  data-seg-active={active}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-[0.55rem] px-1 py-1.5 text-center text-xs leading-tight transition-[color,transform] duration-200 active:scale-[0.96] sm:flex-none sm:gap-2 sm:px-3 sm:text-sm ${
+                    active ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -154,7 +194,7 @@ function TasksLayout() {
           )}
         </div>
       )}
-      <div className={searching ? "hidden" : "contents"}>
+      <div ref={viewRef} className={searching ? "hidden" : "min-w-0"}>
         <Outlet />
       </div>
       <TaskDialog

@@ -466,17 +466,17 @@ function ListPage() {
           ) : undefined}
         />
       ) : (
-      <div className="overflow-hidden rounded-lg border bg-card">
-        <table className="w-full table-fixed border-collapse text-xs">
-          <thead className="border-b bg-muted/50 text-left text-[10px] uppercase tracking-wide text-muted-foreground">
+      <div className="tf-list -mt-1.5">
+        <table className="w-full table-fixed text-[13px]">
+          <thead className="text-left text-[10.5px] uppercase text-muted-foreground">
             <tr>
-              <th className="w-[25%] border-r px-2 py-2">Tarefa</th>
-              <th className="w-[11%] border-r px-2 py-2">Cliente</th>
-              <th className="w-[13%] border-r px-2 py-2">Responsável</th>
-              <th className="w-[12%] border-r px-2 py-2">Colaboradores</th>
-              <th className="w-[10%] border-r px-2 py-2">Status</th>
-              <th className="w-[10%] border-r px-2 py-2">Prioridade</th>
-              <th className="w-[10%] border-r px-2 py-2">
+              <th className="w-[25%] px-2 py-2">Tarefa</th>
+              <th className="w-[11%] px-2 py-2">Cliente</th>
+              <th className="w-[13%] px-2 py-2">Responsável</th>
+              <th className="w-[12%] px-2 py-2">Colaboradores</th>
+              <th className="w-[10%] px-2 py-2">Status</th>
+              <th className="w-[10%] px-2 py-2">Prioridade</th>
+              <th className="w-[10%] px-2 py-2">
                 <button
                   type="button"
                   className="flex items-center gap-1 transition-colors hover:text-foreground"
@@ -500,13 +500,13 @@ function ListPage() {
           <tbody>
             {list.length === 0 && completedParts.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-10 text-center text-muted-foreground">
-                  Nenhuma tarefa
+                <td colSpan={8} className="rounded-xl border border-dashed py-14 text-center text-muted-foreground">
+                  Nenhuma tarefa neste filtro. Crie uma em “Nova tarefa”.
                 </td>
               </tr>
             ) : list.map((t, index) => {
               if (pendingTaskIds.has(t.id)) return (
-                <tr key={t.id} aria-busy="true" className="border-t">
+                <tr key={t.id} aria-busy="true" className="tf-list-row animate-pulse">
                   <td colSpan={8} className="px-3 py-2">{t.title} <span className="text-xs text-muted-foreground">Salvando…</span></td>
                 </tr>
               );
@@ -554,17 +554,16 @@ function ListPage() {
                 )}
                 {isCompleted && !completedOpen ? null :
                 <tr
-                  className={`cursor-pointer border-t transition-colors hover:bg-muted/30 ${
+                  className={`tf-list-row cursor-pointer ${
                     isCompleted ? "opacity-60 grayscale-[0.2]" : ""
                   }`}
-                  style={!isCompleted && displayStatus ? { boxShadow: `inset 3px 0 ${displayStatus.color}` } : undefined}
                   onClick={() => {
                     setEdit(t);
                     setOpen(true);
                   }}
                 >
-                  <td className="border-r px-2 py-2 font-medium"><div className="flex items-center gap-1"><TaskPinButton task={t} compact /><span className="block truncate"><LinkedText text={t.title} /></span></div>{t.is_draft && <span className="text-[10px] font-semibold text-amber-700">Em elaboração</span>}</td>
-                  <td className="border-r px-2 py-2">
+                  <td className="px-2 py-2 font-medium"><div className="flex items-center gap-2"><span aria-hidden="true" className="tf-status-dot h-2 w-2 shrink-0 rounded-full" style={{ color: displayStatus?.color ?? "#6b7280", backgroundColor: displayStatus?.color ?? "#6b7280" }} /><TaskPinButton task={t} compact /><span className="block truncate"><LinkedText text={t.title} /></span></div>{t.is_draft && <span className="text-[10px] font-semibold text-amber-700">Em elaboração</span>}</td>
+                  <td className="px-2 py-2">
                     <div className="flex flex-wrap gap-1">{client ? (
                       <Badge variant="outline" style={{ borderColor: client.color ?? undefined }}>
                         {client.name}
@@ -573,10 +572,10 @@ function ListPage() {
                       <span className="text-muted-foreground">—</span>
                     )}{additionalClients.map((extraClient) => <Badge key={extraClient.id} variant="outline" style={{ borderColor: extraClient.color ?? undefined }}>{extraClient.name}</Badge>)}</div>
                   </td>
-                  <td className="border-r px-2 py-2 text-muted-foreground">
+                  <td className="px-2 py-2 text-muted-foreground">
                     {assignee?.full_name || assignee?.email || "—"}
                   </td>
-                  <td className="border-r px-2 py-2">
+                  <td className="px-2 py-2">
                     {taskCollaborators.length > 0 ? (
                       <div className="flex -space-x-1" title={taskCollaborators.map((p: any) => p.full_name || p.email).join(", ")}>
                         {taskCollaborators.slice(0, 3).map((person: any) => {
@@ -587,7 +586,7 @@ function ListPage() {
                       </div>
                     ) : <span className="text-muted-foreground">—</span>}
                   </td>
-                  <td className="border-r px-2 py-2">
+                  <td className="px-2 py-2">
                     {displayStatus && isCompleted ? (
                       <Badge variant="outline" className="max-w-full truncate" style={{ borderColor: displayStatus.color, color: displayStatus.color }}>{displayStatus.name}</Badge>
                     ) : (
@@ -603,7 +602,7 @@ function ListPage() {
                       </DropdownMenu>
                     )}
                   </td>
-                  <td className="border-r px-2 py-2">
+                  <td className="px-2 py-2">
                     {t.priority ? (
                       <Badge
                         variant="outline"
@@ -624,7 +623,7 @@ function ListPage() {
                       : "—"}
                   </td>
                   <td className="px-1 py-2 text-center">
-                    <div className="flex items-center justify-center gap-0.5">
+                    <div className="tf-row-actions flex items-center justify-center gap-0.5">
                       <Button
                         size="icon"
                         variant="ghost"
@@ -683,22 +682,22 @@ function ListPage() {
                   return (
                     <tr
                       key={`subtask:${subtask.id}`}
-                      className="cursor-pointer border-t bg-emerald-50/30 transition-colors hover:bg-emerald-50/70 dark:bg-emerald-950/10 dark:hover:bg-emerald-950/20"
+                      className="tf-list-row cursor-pointer"
                       onClick={() => { setEdit(parent); setOpen(true); }}
                     >
-                      <td className="border-r px-2 py-2">
+                      <td className="px-2 py-2">
                         <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
                           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                           <span className="truncate font-medium line-through">{subtask.title}</span>
                         </div>
                         <span className="pl-5 text-[10px] text-muted-foreground">Subtarefa de {parent.title}</span>
                       </td>
-                      <td className="border-r px-2 py-2">{client ? <Badge variant="outline" style={{ borderColor: client.color ?? undefined }}>{client.name}</Badge> : "—"}</td>
-                      <td className="border-r px-2 py-2 text-muted-foreground">{ownProfile?.full_name || ownProfile?.email || "—"}</td>
-                      <td className="border-r px-2 py-2 text-muted-foreground">—</td>
-                      <td className="border-r px-2 py-2"><Badge variant="outline" className="border-emerald-500 text-emerald-700 dark:text-emerald-400">Concluída</Badge></td>
-                      <td className="border-r px-2 py-2 text-muted-foreground">—</td>
-                      <td className="border-r px-2 py-2 text-muted-foreground">{dueDate ? format(new Date(dueDate), "dd MMM yyyy", { locale: ptBR }) : "—"}</td>
+                      <td className="px-2 py-2">{client ? <Badge variant="outline" style={{ borderColor: client.color ?? undefined }}>{client.name}</Badge> : "—"}</td>
+                      <td className="px-2 py-2 text-muted-foreground">{ownProfile?.full_name || ownProfile?.email || "—"}</td>
+                      <td className="px-2 py-2 text-muted-foreground">—</td>
+                      <td className="px-2 py-2"><Badge variant="outline" className="border-emerald-500 text-emerald-700 dark:text-emerald-400">Concluída</Badge></td>
+                      <td className="px-2 py-2 text-muted-foreground">—</td>
+                      <td className="px-2 py-2 text-muted-foreground">{dueDate ? format(new Date(dueDate), "dd MMM yyyy", { locale: ptBR }) : "—"}</td>
                       <td className="px-1 py-2 text-center text-muted-foreground">—</td>
                     </tr>
                   );

@@ -30,7 +30,7 @@ export function ClientsNavGroup({
       to="/clients"
       search={{ client: client.id }}
       onClick={onNavigate}
-      className={`block min-w-0 cursor-pointer rounded-lg px-3 py-2 text-xs transition hover:bg-sidebar-accent/15 ${active && selectedId === client.id ? "bg-sidebar-primary/10 font-semibold text-sidebar-primary" : "text-sidebar-foreground/80"}`}
+      className={`block min-w-0 cursor-pointer rounded-lg px-3 py-2 text-xs transition hover:bg-sidebar-accent ${active && selectedId === client.id ? "bg-sidebar-accent font-semibold text-sidebar-foreground" : "text-sidebar-foreground/70"}`}
     >
       <span className="block truncate" title={client.name}>
         {client.name}
@@ -48,22 +48,25 @@ export function ClientsNavGroup({
 
   if (!expanded)
     return (
-      <div className="relative mx-auto h-11 w-11">
+      <div className="relative mx-auto h-10 w-10">
         <Link
           to="/clients"
           search={{}}
           onClick={onNavigate}
+          data-nav-row
           title="Clientes · calendário geral"
-          className={`grid h-10 w-10 cursor-pointer place-items-center rounded-full ${active ? "bg-sidebar-primary/10 text-sidebar-primary" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/10"}`}
+          className={`tf-nav-item grid h-10 w-10 cursor-pointer place-items-center rounded-[0.8rem] ${active ? "tf-nav-item-active text-sidebar-foreground" : "text-sidebar-foreground/65 hover:text-sidebar-foreground"}`}
         >
-          <Building2 className="h-4 w-4" />
+          <span className="tf-nav-icon grid h-7 w-7 place-items-center rounded-[0.55rem]">
+            <Building2 className="h-[17px] w-[17px]" strokeWidth={1.75} />
+          </span>
         </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
               aria-label="Abrir lista de clientes"
-              className="absolute -right-1 bottom-0 grid h-5 w-5 cursor-pointer place-items-center rounded-full border bg-background shadow-sm"
+              className="absolute -bottom-1 -right-1 grid h-5 w-5 cursor-pointer place-items-center rounded-full border bg-background shadow-sm transition-transform duration-150 active:scale-90"
             >
               <ChevronDown className="h-3 w-3" />
             </button>
@@ -99,18 +102,17 @@ export function ClientsNavGroup({
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="space-y-1">
       <div
-        className={`flex items-center rounded-full ${active ? "border border-sidebar-primary bg-sidebar/45 font-medium shadow-sm" : "hover:bg-sidebar-accent/10"}`}
+        data-nav-row
+        className={`tf-nav-item flex items-center rounded-[0.8rem] ${active ? "tf-nav-item-active font-medium text-sidebar-foreground" : "text-sidebar-foreground/65 hover:text-sidebar-foreground"} ${onNavigate && active ? "tf-nav-item-mobile-active" : ""}`}
       >
         <Link
           to="/clients"
           search={{}}
           onClick={onNavigate}
-          className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 py-2 pl-3 text-sm"
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 py-2 pl-2.5 text-sm"
         >
-          <span
-            className={`grid h-7 w-7 shrink-0 place-items-center ${active ? "rounded-full bg-sidebar-primary text-sidebar-primary-foreground" : ""}`}
-          >
-            <Building2 className="h-4 w-4" />
+          <span className="tf-nav-icon grid h-7 w-7 shrink-0 place-items-center rounded-[0.55rem]">
+            <Building2 className="h-[17px] w-[17px]" strokeWidth={1.75} />
           </span>
           Clientes
         </Link>
@@ -119,12 +121,12 @@ export function ClientsNavGroup({
           aria-label={open ? "Recolher lista de clientes" : "Abrir lista de clientes"}
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
-          className="mr-1 grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full hover:bg-sidebar-accent/15"
+          className="mr-1 grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-[0.6rem] hover:bg-sidebar-accent"
         >
-          <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+          <ChevronDown className={`h-4 w-4 transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${open ? "rotate-180" : ""}`} />
         </button>
       </div>
-      <CollapsibleContent className="ml-6 max-h-[45dvh] space-y-0.5 overflow-y-auto border-l border-sidebar-primary/20 pl-2">
+      <CollapsibleContent className="tf-collapsible ml-6 max-h-[45dvh] space-y-0.5 overflow-y-auto border-l border-sidebar-border pl-2">
         {links}
         {status && <p className="p-2 text-xs text-muted-foreground">{status}</p>}
       </CollapsibleContent>

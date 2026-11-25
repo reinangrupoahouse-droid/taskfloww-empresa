@@ -787,14 +787,14 @@ function MuralPage() {
   };
 
   return (
-    <div className="mural-la min-h-full bg-background px-4 py-5 text-[#313532] sm:px-7 sm:py-7">
+    <div className="mural-la min-h-full bg-background px-4 py-5 text-[#24272c] sm:px-7 sm:py-7">
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="mural-subtle text-[11px] text-[#8a9089]">Mural LA</p>
+          <p className="mural-subtle text-[11px] text-[#7a808a]">Mural</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">
             Olá, {profileName(profiles, user?.id)} 👋
           </h1>
-          <p className="mural-subtle mt-1 text-sm text-[#747a74]">
+          <p className="mural-subtle mt-1 text-sm text-[#6b717b]">
             Recados, normas e novidades compartilhadas com a equipe.
           </p>
         </div>
@@ -809,7 +809,7 @@ function MuralPage() {
               if (!next) setEditingPost(null);
             }}
           >
-            <DialogContent className="max-h-[86dvh] w-[calc(100vw-2rem)] max-w-6xl overflow-y-auto border-0 bg-[#ebe9e5] p-5 shadow-2xl sm:p-6">
+            <DialogContent className="max-h-[86dvh] w-[calc(100vw-2rem)] max-w-6xl overflow-y-auto border-0 bg-[#e9ebee] p-5 shadow-2xl sm:p-6">
               <DialogHeader>
                 <DialogTitle className="text-xl tracking-tight">
                   {editingPost ? "Editar recado no mural" : "Novo recado no mural"}
@@ -875,7 +875,7 @@ function MuralPage() {
                           aria-label={color.label}
                           aria-pressed={form.color === color.value}
                           onClick={() => setForm({ ...form, color: color.value })}
-                          className={`h-7 w-7 rounded-full border border-black/10 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#287f80] focus-visible:ring-offset-2 ${color.card.split(" ")[0]} ${form.color === color.value ? "ring-2 ring-[#287f80] ring-offset-2" : ""}`}
+                          className={`h-7 w-7 rounded-full border border-black/10 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3f4955] focus-visible:ring-offset-2 ${color.card.split(" ")[0]} ${form.color === color.value ? "ring-2 ring-[#3f4955] ring-offset-2" : ""}`}
                         />
                       ))}
                     </div>
@@ -922,7 +922,7 @@ function MuralPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-[#d8d5cf] px-1 py-3">
+                  <div className="flex items-center justify-between border-t border-[#dde0e5] px-1 py-3">
                     <div>
                       <p className="font-medium">Fixar no topo</p>
                       <p className="text-xs text-muted-foreground">
@@ -934,7 +934,7 @@ function MuralPage() {
                       onCheckedChange={(isPinned) => setForm({ ...form, isPinned })}
                     />
                   </div>
-                  <div className="flex items-center justify-between border-t border-[#d8d5cf] px-1 py-3">
+                  <div className="flex items-center justify-between border-t border-[#dde0e5] px-1 py-3">
                     <div>
                       <p className="font-medium">Marcar como destaque</p>
                       <p className="text-xs text-muted-foreground">
@@ -948,7 +948,7 @@ function MuralPage() {
                   </div>
                 </div>
               </div>
-              <details className="border-t border-[#d8d5cf] px-1 py-3">
+              <details className="border-t border-[#dde0e5] px-1 py-3">
                 <summary className="cursor-pointer font-medium">Opções avançadas</summary>
                 <div className="mt-4 grid gap-4 md:grid-cols-3">
                   <div className="space-y-2">
@@ -1067,7 +1067,7 @@ function MuralPage() {
           >
             <div>
               <p className="text-sm font-medium">{metric.label}</p>
-              <p className="mt-1 text-xs text-[#727973]">Atualização do mural</p>
+              <p className="mt-1 text-xs text-[#6b717b]">Atualização do mural</p>
             </div>
             <strong className="text-2xl font-semibold">{metric.value}</strong>
           </div>
@@ -1075,7 +1075,7 @@ function MuralPage() {
       </section>
 
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#858b85]">
+        <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#7a808a]">
           Em destaque
         </p>
         <div className="mural-filter flex flex-wrap gap-1 rounded-full bg-white/70 p-1 text-xs shadow-sm">
@@ -1091,7 +1091,7 @@ function MuralPage() {
               key={value}
               type="button"
               onClick={() => setPostFilter(value)}
-              className={`rounded-full px-3 py-1 transition-colors ${postFilter === value ? "bg-[#d9efed] text-[#256e6f]" : "text-[#737a74] hover:bg-[#eeefea]"}`}
+              className={`rounded-full px-3 py-1 transition-colors ${postFilter === value ? "bg-[#d9efed] text-[#2f3740]" : "text-[#6b717b] hover:bg-[#eceef1]"}`}
             >
               {label}
             </button>
@@ -1100,11 +1100,11 @@ function MuralPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-20 text-center text-sm text-[#747a74]">Carregando mural...</div>
+        <div className="py-20 text-center text-sm text-[#6b717b]">Carregando mural...</div>
       ) : orderedPosts.length === 0 ? (
-        <div className="mural-empty grid min-h-72 place-items-center rounded-xl border border-dashed border-[#d9dcd5] bg-white/50 p-8 text-center">
+        <div className="mural-empty grid min-h-72 place-items-center rounded-xl border border-dashed border-[#dde0e5] bg-white/50 p-8 text-center">
           <div>
-            <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl bg-[#dff2fa] text-[#287f80]">
+            <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl bg-[#dff2fa] text-[#3f4955]">
               <Pin className="h-5 w-5" />
             </div>
             <h2 className="font-semibold">
@@ -1112,7 +1112,7 @@ function MuralPage() {
                 ? "O mural está pronto para começar"
                 : "Nenhum recado nesta visualização"}
             </h2>
-            <p className="mt-1 text-sm text-[#747a74]">
+            <p className="mt-1 text-sm text-[#6b717b]">
               {postFilter === "all"
                 ? "Publique o primeiro recado para compartilhar uma ideia ou comunicado."
                 : "Use os filtros acima para navegar entre os outros recados."}
@@ -1144,7 +1144,7 @@ function MuralPage() {
                     if (node) postRefs.current.set(post.id, node);
                     else postRefs.current.delete(post.id);
                   }}
-                  className={`group relative flex min-w-0 self-start flex-col rounded-md p-4 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_8px_20px_rgba(0,0,0,0.07)] transition-transform duration-300 hover:-translate-y-0.5 hover:rotate-0 ${index % 3 === 0 ? "-rotate-1" : index % 3 === 1 ? "rotate-1" : "rotate-[0.5deg]"} ${post.card_size === "large" ? "min-h-[220px] md:col-span-2 p-6" : post.card_size === "compact" ? "min-h-[180px] max-w-xs p-3" : "min-h-[180px]"} ${post.is_pinned ? "ring-1 ring-[#287f80]/45" : ""} ${draggingId === post.id ? "opacity-75 shadow-xl" : ""} ${colorClass(post.color)}`}
+                  className={`group relative flex min-w-0 self-start flex-col rounded-md p-4 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_8px_20px_rgba(0,0,0,0.07)] transition-transform duration-300 hover:-translate-y-0.5 hover:rotate-0 ${index % 3 === 0 ? "-rotate-1" : index % 3 === 1 ? "rotate-1" : "rotate-[0.5deg]"} ${post.card_size === "large" ? "min-h-[220px] md:col-span-2 p-6" : post.card_size === "compact" ? "min-h-[180px] max-w-xs p-3" : "min-h-[180px]"} ${post.is_pinned ? "ring-1 ring-[#3f4955]/45" : ""} ${draggingId === post.id ? "opacity-75 shadow-xl" : ""} ${colorClass(post.color)}`}
                   style={{
                     ...textStyleCss(post.text_style),
                   }}

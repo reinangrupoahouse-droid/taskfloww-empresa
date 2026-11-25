@@ -15,6 +15,9 @@ interface Profile {
   active_workspace_id?: string | null;
 }
 
+/** Nome exibido do único ambiente desta cópia (substitui "Consultoria"). */
+export const EMPRESA_WORKSPACE_NAME = "Empresa";
+
 export interface WorkspaceMembership {
   id: string;
   slug: "consultoria" | "marketing";
@@ -86,8 +89,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsClient(snapshot.isClient);
       setClientId(snapshot.clientId);
       setPermissions(snapshot.permissions);
-      setWorkspaces(snapshot.workspaces);
-      setActiveWorkspaceState(snapshot.activeWorkspace);
+      const empresaWorkspaces = snapshot.workspaces
+        .filter((workspace) => workspace.slug === "consultoria")
+        .map((workspace) => ({ ...workspace, name: EMPRESA_WORKSPACE_NAME }));
+      setWorkspaces(empresaWorkspaces);
+      setActiveWorkspaceState(
+        snapshot.activeWorkspace?.slug === "consultoria"
+          ? { ...snapshot.activeWorkspace, name: EMPRESA_WORKSPACE_NAME }
+          : (empresaWorkspaces[0] ?? null),
+      );
       return true;
     } catch {
       return false;
@@ -180,12 +190,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const memberships = ((membershipsResult.data ?? []) as Array<any>)
       .map((membership) => {
         const workspace = workspaceById.get(membership.workspace_id);
-        if (!workspace?.id || (workspace.slug !== "consultoria" && workspace.slug !== "marketing"))
-          return null;
+        // Esta cópia (Taskfloww Empresa) trabalha só com o ambiente principal.
+        // O Marketing continua no banco, mas não aparece nem é selecionável aqui.
+        if (!workspace?.id || workspace.slug !== "consultoria") return null;
         return {
           id: workspace.id,
           slug: workspace.slug,
-          name: workspace.name,
+          name: EMPRESA_WORKSPACE_NAME,
           role: membership.role,
           permissions: Array.isArray(membership.permissions) ? membership.permissions : [],
           canViewAllTasks: membership.can_view_all_tasks === true,
@@ -222,9 +233,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Never silently fall back to the first membership if the server returned
     // an unknown active id. A fallback can label the UI "Consultoria" while
     // RLS still authorizes Marketing data. The next refresh will resolve it.
-    const selectedWorkspace = prof?.active_workspace_id
+    let selectedWorkspace = prof?.active_workspace_id
       ? (memberships.find((workspace) => workspace.id === prof.active_workspace_id) ?? null)
       : (memberships[0] ?? null);
+    // Quem estava no Marketing volta ao ambiente principal no servidor, para
+    // que o RLS e a interface apontem para o mesmo ambiente.
+    if (!selectedWorkspace && memberships[0] && prof?.active_workspace_id) {
+      const { error: switchError } = await (supabase as any).rpc("select_active_workspace", {
+        target_workspace_id: memberships[0].id,
+      });
+      if (!switchError) selectedWorkspace = memberships[0];
+    }
     setWorkspaces(memberships);
     setActiveWorkspaceState(selectedWorkspace);
     setPermissions(

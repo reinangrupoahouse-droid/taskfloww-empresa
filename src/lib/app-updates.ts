@@ -2,6 +2,7 @@ import { canManageMarketingAccess } from "./environment-access";
 
 export type UpdateWorkspace = "marketing" | "consultoria";
 export type UpdatePreviewKind =
+  | "graphite-redesign-board"
   | "empresa-black"
   | "mobile-tasks-push"
   | "maintenance"
@@ -87,6 +88,21 @@ export type AppUpdate = {
 // Keep newest first. The first visible entry determines the update notice and
 // acknowledgement key, so a release is registered once, not in several screens.
 export const APP_UPDATES: readonly AppUpdate[] = [
+  {
+    id: "visual-grafite-e-quadro-2026-11-25",
+    title: "Novo visual grafite e a aba Quadro",
+    date: "2026-11-25",
+    preview: "graphite-redesign-board",
+    audience: "all",
+    workspaces: ["consultoria"],
+    details: [
+      "Visual cinza metálico nos modos escuro e claro, com transições suaves ao trocar de aba e ao abrir o menu.",
+      "Menu mais enxuto: Mural, Dashboard, Minhas Tarefas, Quadro, Clientes, CRM e Relatórios. Conversas, Obrigações, Reuniões, Agenda e Portal do Cliente saíram.",
+      "Kanban com cards que reagem ao mouse e assentam suavemente ao arrastar. A Lista ganhou linhas separadas com a cor do status.",
+      "Nova aba Quadro: escreva livremente com notas, textos e formas, ligue ideias e monte mapas mentais (Tab cria um ramo, Enter cria um irmão).",
+      "Esta cópia trabalha só com o ambiente Empresa.",
+    ],
+  },
   {
     id: "taskfloww-empresa-preto-2026-11-25",
     title: "Taskfloww Empresa com visual preto",

@@ -23,6 +23,7 @@ import { Route as AppMeetingsRouteImport } from './routes/_app/meetings'
 import { Route as AppMuralRouteImport } from './routes/_app/mural'
 import { Route as AppNotesRouteImport } from './routes/_app/notes'
 import { Route as AppObligationsRouteImport } from './routes/_app/obligations'
+import { Route as AppQuadroRouteImport } from './routes/_app/quadro'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppRequestsRouteImport } from './routes/_app/requests'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
@@ -111,6 +112,11 @@ const AppNotesRoute = AppNotesRouteImport.update({
 const AppObligationsRoute = AppObligationsRouteImport.update({
   id: '/obligations',
   path: '/obligations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppQuadroRoute = AppQuadroRouteImport.update({
+  id: '/quadro',
+  path: '/quadro',
   getParentRoute: () => AppRoute,
 } as any)
 const AppReportsRoute = AppReportsRouteImport.update({
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/mural': typeof AppMuralRoute
   '/notes': typeof AppNotesRoute
   '/obligations': typeof AppObligationsRoute
+  '/quadro': typeof AppQuadroRoute
   '/reports': typeof AppReportsRoute
   '/requests': typeof AppRequestsRoute
   '/settings': typeof AppSettingsRoute
@@ -263,6 +270,7 @@ export interface FileRoutesByTo {
   '/mural': typeof AppMuralRoute
   '/notes': typeof AppNotesRoute
   '/obligations': typeof AppObligationsRoute
+  '/quadro': typeof AppQuadroRoute
   '/reports': typeof AppReportsRoute
   '/requests': typeof AppRequestsRoute
   '/settings': typeof AppSettingsRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/_app/mural': typeof AppMuralRoute
   '/_app/notes': typeof AppNotesRoute
   '/_app/obligations': typeof AppObligationsRoute
+  '/_app/quadro': typeof AppQuadroRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/requests': typeof AppRequestsRoute
   '/_app/settings': typeof AppSettingsRoute
@@ -336,6 +345,7 @@ export interface FileRouteTypes {
     | '/mural'
     | '/notes'
     | '/obligations'
+    | '/quadro'
     | '/reports'
     | '/requests'
     | '/settings'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/mural'
     | '/notes'
     | '/obligations'
+    | '/quadro'
     | '/reports'
     | '/requests'
     | '/settings'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/_app/mural'
     | '/_app/notes'
     | '/_app/obligations'
+    | '/_app/quadro'
     | '/_app/reports'
     | '/_app/requests'
     | '/_app/settings'
@@ -533,6 +545,13 @@ declare module '@tanstack/react-router' {
       path: '/obligations'
       fullPath: '/obligations'
       preLoaderRoute: typeof AppObligationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/quadro': {
+      id: '/_app/quadro'
+      path: '/quadro'
+      fullPath: '/quadro'
+      preLoaderRoute: typeof AppQuadroRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/reports': {
@@ -728,6 +747,7 @@ interface AppRouteChildren {
   AppMuralRoute: typeof AppMuralRoute
   AppNotesRoute: typeof AppNotesRoute
   AppObligationsRoute: typeof AppObligationsRoute
+  AppQuadroRoute: typeof AppQuadroRoute
   AppReportsRoute: typeof AppReportsRoute
   AppRequestsRoute: typeof AppRequestsRoute
   AppSettingsRoute: typeof AppSettingsRoute
@@ -751,6 +771,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMuralRoute: AppMuralRoute,
   AppNotesRoute: AppNotesRoute,
   AppObligationsRoute: AppObligationsRoute,
+  AppQuadroRoute: AppQuadroRoute,
   AppReportsRoute: AppReportsRoute,
   AppRequestsRoute: AppRequestsRoute,
   AppSettingsRoute: AppSettingsRoute,

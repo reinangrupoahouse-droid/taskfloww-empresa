@@ -45,6 +45,8 @@ describe("independent published release catalogue", () => {
       id: "future",
       date: APP_UPDATES[0].date,
       audience: "admin" as const,
+      // A novidade mais recente do catálogo é só do ambiente Empresa.
+      workspaces: ["marketing"] as const,
     };
     expect(
       newerPublishedAppUpdate(

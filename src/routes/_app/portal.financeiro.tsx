@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { isBefore, startOfToday } from "date-fns";
@@ -16,7 +16,12 @@ import { Label } from "@/components/ui/label";
 import { FileDropZone } from "@/components/FileDropZone";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const Route = createFileRoute("/_app/portal/financeiro")({ component: ClientFinancePage });
+export const Route = createFileRoute("/_app/portal/financeiro")({
+  beforeLoad: () => {
+    // Aba removida do Taskfloww Empresa; links antigos voltam ao painel.
+    throw redirect({ to: "/dashboard" });
+  },
+  component: ClientFinancePage });
 
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const initialForm = { description: "", amount: "", dueDate: "", paymentMethod: "pix", paymentLink: "", pixKey: "" };
