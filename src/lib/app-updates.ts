@@ -2,6 +2,7 @@ import { canManageMarketingAccess } from "./environment-access";
 
 export type UpdateWorkspace = "marketing" | "consultoria";
 export type UpdatePreviewKind =
+  | "tag-filter-saved"
   | "list-tags-files-full-titles"
   | "desktop-app-dock"
   | "graphite-redesign-board"
@@ -90,6 +91,21 @@ export type AppUpdate = {
 // Keep newest first. The first visible entry determines the update notice and
 // acknowledgement key, so a release is registered once, not in several screens.
 export const APP_UPDATES: readonly AppUpdate[] = [
+  {
+    id: "filtro-por-tags-salvo-2026-11-25",
+    title: "Filtro por tags salvo, tags novas na Lista e arquivos no Calendário",
+    date: "2026-11-25",
+    preview: "tag-filter-saved",
+    audience: "all",
+    workspaces: ["consultoria"],
+    details: [
+      "Em Filtros, escolha uma ou mais tags para ver só as tarefas que tenham alguma delas, no Kanban, na Lista e no Calendário.",
+      "Os filtros ficam salvos: continuam aplicados ao trocar de aba, sair e voltar ou recarregar. O período escolhido na Lista ou no Kanban não esconde tarefas do Calendário.",
+      "Na coluna Tags da Lista dá para criar uma tag nova, com cor, e ela já entra na tarefa.",
+      "No Calendário, o clipe ao lado da tarefa abre os arquivos, e o nome aparece completo. Com a janela estreita (versão de celular), a Lista também mostra tags e arquivos.",
+      "Tarefas com prazo à noite não caem mais no dia seguinte do Calendário.",
+    ],
+  },
   {
     id: "lista-tags-arquivos-e-kanban-leve-2026-11-25",
     title: "Lista com tags e arquivos, Kanban mais leve",

@@ -71,6 +71,8 @@ import {
   type Profile,
 } from "@/hooks/use-data";
 import { useAuth } from "@/hooks/use-auth";
+import { ListFilesCell } from "@/components/TaskListExtras";
+import { usePersistentTaskFilters, useTagFilterTaskIds } from "@/hooks/use-task-filters";
 import { hasMarketingTaskExperience } from "@/lib/environment-access";
 import { useTeamTaskVisibility } from "@/hooks/use-team-task-visibility";
 import { defaultsToOwnScope, teamSubtaskAssigneeTaskIds } from "@/lib/team-task-visibility";
@@ -100,14 +102,20 @@ export function CalendarPage({ clientCalendar = false, clientId }: { clientCalen
   const [agendaDay, setAgendaDay] = useState(() => new Date());
   const [mobileDialogDefaults, setMobileDialogDefaults] = useState<ReturnType<typeof quickValuesToDialogDefaults> | undefined>();
   const queryClient = useQueryClient();
-  const [viewFilters, setFilters] = useState<TaskFilterValue>(() =>
-    clientCalendar ? {} : defaultsToOwnScope(user?.id, teamVisibilityWorkspaceId, activeWorkspace?.slug)
-      ? { scope: "mine" }
-      : {},
+  // O calendário de um cliente específico não grava filtros; o geral compartilha
+  // os filtros salvos com o Kanban e a Lista.
+  const [viewFilters, setFilters, restoredFilters] = usePersistentTaskFilters(
+    () =>
+      clientCalendar ? {} : defaultsToOwnScope(user?.id, teamVisibilityWorkspaceId, activeWorkspace?.slug)
+        ? { scope: "mine" }
+        : {},
+    // O período (Hoje, Esta semana…) da Lista/Kanban não esconde tarefas do Calendário.
+    { persist: !clientCalendar, localFields: ["date"] },
   );
   const filters = useMemo<TaskFilterValue>(() => clientCalendar
     ? { ...viewFilters, client: clientId, clients: undefined }
     : viewFilters, [clientCalendar, clientId, viewFilters]);
+  const tagTaskIds = useTagFilterTaskIds(filters.tags);
   // O calendário acompanha o ambiente escolhido no filtro sem trocar o
   // ambiente ativo da sessão administrativa.
   const viewedWorkspaceId = filters.workspace;
@@ -139,7 +147,7 @@ export function CalendarPage({ clientCalendar = false, clientId }: { clientCalen
   const { data: collaborators = [] } = useTaskCollaborators();
   const [cursor, setCursor] = useState(new Date());
   const [calendarView, setCalendarView] = useState<"week" | "month">("month");
-  const didApplyDefaultAssignee = useRef(false);
+  const didApplyDefaultAssignee = useRef(restoredFilters);
   const [open, setOpen] = useState(false);
   const [newTaskDay, setNewTaskDay] = useState<string | undefined>();
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -340,10 +348,12 @@ export function CalendarPage({ clientCalendar = false, clientId }: { clientCalen
         subtaskAssigneeTaskIdsByUser,
         restrictToCurrentUserParticipation: isCollaborator,
         teamVisibilityWorkspaceId,
+        tagTaskIds,
       }),
     [
       taskView,
       filters,
+      tagTaskIds,
       user?.id,
       isCollaborator,
       teamVisibilityWorkspaceId,
@@ -398,9 +408,10 @@ export function CalendarPage({ clientCalendar = false, clientId }: { clientCalen
         return applyTaskFilters([calendarSubtask], filters, {
           userId: user.id,
           restrictToCurrentUserParticipation: isCollaborator,
+          tagTaskIds,
         }).length > 0;
       });
-  }, [tasks, subtasks, user?.id, viewedWorkspaceId, teamVisibilityWorkspaceId, filters, isCollaborator, clientCalendar]);
+  }, [tasks, subtasks, user?.id, viewedWorkspaceId, teamVisibilityWorkspaceId, filters, isCollaborator, clientCalendar, tagTaskIds]);
 
   const pendingPinnedIds = new Set(pendingPersonalPriorities(taskView, pins).map(task => task.id));
   const dayEntries = (day: Date) => {
@@ -1186,7 +1197,7 @@ function CalendarTaskItem({
         />
       ) : null}
       <span
-        className={`min-w-0 flex-1 ${marketingStyle ? "line-clamp-2 text-xs font-semibold leading-[14px]" : "truncate font-semibold"} ${expanded && !marketingStyle ? "text-sm" : !marketingStyle ? "text-[11px]" : ""} ${completed ? "line-through decoration-2 decoration-emerald-700/80" : ""}`}
+        className={`min-w-0 flex-1 ${marketingStyle ? "break-words text-xs font-semibold leading-[14px]" : "break-words font-semibold leading-tight [overflow-wrap:anywhere]"} ${expanded && !marketingStyle ? "text-sm" : !marketingStyle ? "text-[11px]" : ""} ${completed ? "line-through decoration-2 decoration-emerald-700/80" : ""}`}
       >
         {!titleOnly && task.is_draft ? "Em elaboração · " : ""}
         {task.title}
@@ -1214,7 +1225,15 @@ function CalendarTaskItem({
       </ContextMenuContent>
     </ContextMenu>
   );
-  if (!onComplete || completed || titleOnly) return card;
+  // Arquivos ao lado do item: abre a lista sem abrir a tarefa.
+  const withFiles = (content: ReactNode) =>
+    titleOnly ? content : (
+      <div className="flex min-w-0 items-stretch gap-0.5">
+        <div className="min-w-0 flex-1">{content}</div>
+        <ListFilesCell taskId={task.id} compact hideEmpty />
+      </div>
+    );
+  if (!onComplete || completed || titleOnly) return withFiles(card);
   const completeControl = (
     <button
         type="button"
@@ -1230,7 +1249,7 @@ function CalendarTaskItem({
         {marketingStyle ? <Check className="h-4 w-4" strokeWidth={2.5} /> : <CheckCircle2 className="h-3.5 w-3.5" />}
       </button>
   );
-  return (
+  return withFiles(
     <div className="group/calendar-complete relative min-w-0">
       {card}
       {marketingStyle ? <TooltipProvider delayDuration={150}><Tooltip><TooltipTrigger asChild>{completeControl}</TooltipTrigger><TooltipContent side="top" className="bg-zinc-900 text-white">Marcar a tarefa concluída</TooltipContent></Tooltip></TooltipProvider> : completeControl}

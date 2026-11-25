@@ -32,10 +32,24 @@ function readableText(hex: string) {
   return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#111" : "#fff";
 }
 
-/** Tags da tarefa na Lista: mostra todas e permite marcar/desmarcar ali mesmo. */
+const NEW_TAG_COLORS = [
+  "#5b6b8c",
+  "#3b74b0",
+  "#3f8a5a",
+  "#b0811c",
+  "#b5524f",
+  "#7058b5",
+  "#4b5563",
+];
+
+/** Tags da tarefa na Lista: mostra todas, marca/desmarca e cria tags novas ali mesmo. */
 export function ListTagsCell({ task, tags }: { task: ListTask; tags: ListTag[] }) {
   const related = useTaskCardRelated(task.id);
   const qc = useQueryClient();
+  const { user } = useAuth();
+  const [newName, setNewName] = useState("");
+  const [newColor, setNewColor] = useState(NEW_TAG_COLORS[0]);
+  const [creating, setCreating] = useState(false);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   useEffect(() => setTagIds(related.data?.tagIds ?? []), [related.data]);
@@ -83,6 +97,7 @@ export function ListTagsCell({ task, tags }: { task: ListTask; tags: ListTag[] }
       }
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["task_card_related"] }),
+        qc.invalidateQueries({ queryKey: ["task_tag_filter"] }),
         qc.invalidateQueries({ queryKey: ["tasks"] }),
       ]);
     } catch (error) {
@@ -90,6 +105,34 @@ export function ListTagsCell({ task, tags }: { task: ListTask; tags: ListTag[] }
       toast.error(error instanceof Error ? error.message : "Não foi possível salvar a tag.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const createTag = async () => {
+    const name = newName.trim();
+    if (!name || creating || !user?.id) return;
+    const existing = tags.find((tag) => tag.name.trim().toLowerCase() === name.toLowerCase());
+    if (existing) {
+      setNewName("");
+      if (!(tagIds.includes(existing.id) || task.tag_id === existing.id)) await toggle(existing.id);
+      return;
+    }
+    setCreating(true);
+    try {
+      const { data, error } = await supabase
+        .from("task_tags")
+        .insert({ name, color: newColor, created_by: user.id, position: tags.length })
+        .select("id")
+        .single();
+      if (error) throw error;
+      setNewName("");
+      await qc.invalidateQueries({ queryKey: ["task_tags"] });
+      if (data?.id) await toggle(data.id);
+      toast.success(`Tag “${name}” criada`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível criar a tag.");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -127,7 +170,7 @@ export function ListTagsCell({ task, tags }: { task: ListTask; tags: ListTag[] }
         <div className="max-h-64 space-y-0.5 overflow-y-auto">
           {tags.length === 0 ? (
             <p className="px-1.5 py-2 text-xs text-muted-foreground">
-              Nenhuma tag criada. Crie tags em Personalizar.
+              Nenhuma tag ainda. Crie a primeira abaixo.
             </p>
           ) : (
             tags.map((tag) => {
@@ -155,6 +198,50 @@ export function ListTagsCell({ task, tags }: { task: ListTask; tags: ListTag[] }
             })
           )}
         </div>
+        <form
+          className="mt-1.5 space-y-1.5 border-t px-1 pt-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void createTag();
+          }}
+        >
+          <div className="flex items-center gap-1.5">
+            <input
+              value={newName}
+              onChange={(event) => setNewName(event.target.value)}
+              onKeyDown={(event) => event.stopPropagation()}
+              placeholder="Nova tag"
+              aria-label="Nome da nova tag"
+              maxLength={40}
+              className="h-8 min-w-0 flex-1 rounded-md border bg-background px-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            />
+            <button
+              type="submit"
+              disabled={!newName.trim() || creating}
+              className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md bg-primary px-2.5 text-xs font-medium text-primary-foreground transition-transform active:scale-95 disabled:opacity-50"
+            >
+              <Plus className="h-3.5 w-3.5" /> {creating ? "Criando…" : "Criar"}
+            </button>
+          </div>
+          <div
+            className="flex items-center gap-1.5 px-0.5"
+            role="radiogroup"
+            aria-label="Cor da nova tag"
+          >
+            {NEW_TAG_COLORS.map((color) => (
+              <button
+                key={color}
+                type="button"
+                role="radio"
+                aria-checked={newColor === color}
+                aria-label={`Cor ${color}`}
+                onClick={() => setNewColor(color)}
+                className={`h-5 w-5 rounded-full transition-transform active:scale-90 ${newColor === color ? "ring-2 ring-ring ring-offset-2 ring-offset-popover" : ""}`}
+                style={{ background: color }}
+              />
+            ))}
+          </div>
+        </form>
       </PopoverContent>
     </Popover>
   );
@@ -168,7 +255,16 @@ const fileIcon = (file: CardAttachment) =>
       : FileText;
 
 /** Arquivos da tarefa na Lista: quantidade e abertura direta, sem abrir a tarefa. */
-export function ListFilesCell({ taskId }: { taskId: string }) {
+export function ListFilesCell({
+  taskId,
+  hideEmpty = false,
+  compact = false,
+}: {
+  taskId: string;
+  hideEmpty?: boolean;
+  /** Versão mínima (clipe + número) para espaços apertados, como o Calendário. */
+  compact?: boolean;
+}) {
   const { user, activeWorkspace } = useAuth();
   const [preview, setPreview] = useState<CardAttachment | null>(null);
   const { data: files = [], isLoading } = useQuery({
@@ -186,8 +282,8 @@ export function ListFilesCell({ taskId }: { taskId: string }) {
     setPreview(file);
   };
 
-  if (isLoading) return <span className="text-muted-foreground">…</span>;
-  if (!files.length) return <span className="text-muted-foreground">—</span>;
+  if (isLoading) return hideEmpty ? null : <span className="text-muted-foreground">…</span>;
+  if (!files.length) return hideEmpty ? null : <span className="text-muted-foreground">—</span>;
 
   return (
     <>
@@ -196,11 +292,19 @@ export function ListFilesCell({ taskId }: { taskId: string }) {
           <button
             type="button"
             onClick={stop}
-            title="Ver arquivos da tarefa"
-            className="inline-flex items-center gap-1.5 rounded-md border bg-background/60 px-2 py-1 text-xs font-medium transition-[background-color,transform] hover:bg-muted active:scale-95"
+            onPointerDown={(event) => event.stopPropagation()}
+            title={`Ver arquivos da tarefa (${files.length})`}
+            aria-label={`Ver ${files.length} ${files.length === 1 ? "arquivo" : "arquivos"} da tarefa`}
+            className={
+              compact
+                ? "inline-flex min-h-6 shrink-0 items-center gap-0.5 rounded-md border bg-card px-1 text-[10px] font-semibold tabular-nums text-muted-foreground shadow-sm transition-[background-color,color,transform] hover:bg-muted hover:text-foreground active:scale-95"
+                : "inline-flex items-center gap-1.5 rounded-md border bg-background/60 px-2 py-1 text-xs font-medium transition-[background-color,transform] hover:bg-muted active:scale-95"
+            }
           >
-            <Paperclip className="h-3.5 w-3.5" />
-            {files.length} {files.length === 1 ? "arquivo" : "arquivos"}
+            <Paperclip className={compact ? "h-3 w-3" : "h-3.5 w-3.5"} />
+            {compact
+              ? files.length
+              : `${files.length} ${files.length === 1 ? "arquivo" : "arquivos"}`}
           </button>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-72 p-1.5" onClick={stop}>

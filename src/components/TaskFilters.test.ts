@@ -232,3 +232,21 @@ describe("applyTaskFilters: tarefas da pessoa", () => {
     expect(result.map((item) => item.id)).toEqual(["part"]);
   });
 });
+
+describe("applyTaskFilters: tags", () => {
+  const tasks = [
+    { ...task("principal"), tag_id: "urgente" },
+    { ...task("vinculada"), tag_id: null },
+    { ...task("sem-tag"), tag_id: null },
+  ];
+
+  it("keeps tasks with the main tag or a linked tag, and drops the rest", () => {
+    const ids = applyTaskFilters(tasks, { tags: ["urgente"] }, { tagTaskIds: new Set(["vinculada"]) }).map((t) => t.id);
+    expect(ids).toEqual(["principal", "vinculada"]);
+  });
+
+  it("matches any of several selected tags and ignores an empty tag filter", () => {
+    expect(applyTaskFilters(tasks, { tags: ["outra", "urgente"] }, { tagTaskIds: new Set() }).map((t) => t.id)).toEqual(["principal"]);
+    expect(applyTaskFilters(tasks, { tags: [] }).map((t) => t.id)).toEqual(["principal", "vinculada", "sem-tag"]);
+  });
+});

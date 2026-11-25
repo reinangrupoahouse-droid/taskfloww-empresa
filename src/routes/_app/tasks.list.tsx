@@ -40,6 +40,7 @@ import { deleteTaskWithOfflineSupport, updateTaskWithOfflineSupport } from "@/li
 import { canDeleteTask } from "@/lib/task-delete-permission";
 import { LinkedText } from "@/components/LinkedText";
 import { ListFilesCell, ListTagsCell } from "@/components/TaskListExtras";
+import { usePersistentTaskFilters, useTagFilterTaskIds } from "@/hooks/use-task-filters";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileTaskList } from "@/components/mobile/MobileTaskList";
 import { MobileTaskActions } from "@/components/mobile/MobileTaskActions";
@@ -59,13 +60,16 @@ function ListPage() {
   const isMobile = useIsMobile();
   const search = Route.useSearch();
   const { user, isAdmin, isCollaborator, activeWorkspace, workspaces, setActiveWorkspace, finishWorkspaceTransition } = useAuth();
-  const [filters, setFilters] = useState<TaskFilterValue>(() =>
-    search.mine
-      ? { scope: "mine" }
-      : defaultsToOwnScope(user?.id, teamVisibilityWorkspaceId, activeWorkspace?.slug)
+  const [filters, setFilters, restoredFilters] = usePersistentTaskFilters(
+    () =>
+      search.mine
         ? { scope: "mine" }
-        : {},
+        : defaultsToOwnScope(user?.id, teamVisibilityWorkspaceId, activeWorkspace?.slug)
+          ? { scope: "mine" }
+          : {},
+    { preferInitial: !!search.mine },
   );
+  const tagTaskIds = useTagFilterTaskIds(filters.tags);
   const viewedWorkspaceId = filters.workspace;
   const { data: tasks = [], pendingTaskIds } = useBoardTasks(viewedWorkspaceId);
   const sharedTask = useQuery({
@@ -87,7 +91,8 @@ function ListPage() {
   const { data: collaborators = [] } = useTaskCollaborators();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const didApplyDefaultAssignee = useRef(false);
+  // Filtros salvos valem como escolha da pessoa: não reaplicar o padrão por cima.
+  const didApplyDefaultAssignee = useRef(restoredFilters);
   const switchingSharedTaskRef = useRef<string | null>(null);
   const [open, setOpen] = useState(false);
   const { pins } = usePersonalTaskPins();
@@ -240,6 +245,7 @@ function ListPage() {
       subtaskDateFilterTaskIds,
       restrictToCurrentUserParticipation: isCollaborator,
       teamVisibilityWorkspaceId,
+      tagTaskIds,
     });
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -283,7 +289,7 @@ function ListPage() {
       const dueDateDifference = aDueTimestamp - bDueTimestamp;
       return dueDateSortDirection === "asc" ? dueDateDifference : -dueDateDifference;
     });
-  }, [tasks, filters, user?.id, isCollaborator, teamVisibilityWorkspaceId, subtaskAssigneeTaskIds, collaboratorTaskIds, subtaskAssigneeTaskIdsByUser, subtaskDateFilterTaskIds, dueDateSortDirection, pinnedIds]);
+  }, [tasks, filters, user?.id, isCollaborator, teamVisibilityWorkspaceId, subtaskAssigneeTaskIds, collaboratorTaskIds, subtaskAssigneeTaskIdsByUser, subtaskDateFilterTaskIds, dueDateSortDirection, pinnedIds, tagTaskIds]);
 
   const completedParts = useMemo(() => {
     if (!user?.id) return [];
@@ -302,9 +308,10 @@ function ListPage() {
         applyTaskFilters([completedSubtaskFilterTask(parent, subtask, user.id)], { ...filters, date: "all" }, {
           userId: user.id,
           restrictToCurrentUserParticipation: isCollaborator,
+          tagTaskIds,
         }).length > 0,
       );
-  }, [tasks, subtasks, user?.id, collaboratorTaskIds, viewedWorkspaceId, filters, isCollaborator, teamVisibilityWorkspaceId]);
+  }, [tasks, subtasks, user?.id, collaboratorTaskIds, viewedWorkspaceId, filters, isCollaborator, teamVisibilityWorkspaceId, tagTaskIds]);
   const hasCompletedTasks = list.some((task) => task.status === "done" || !!task.completed_at);
 
   const completeTask = async (taskId: string, completionDate: string) => {
@@ -435,6 +442,14 @@ function ListPage() {
           pendingTaskIds={pendingTaskIds}
           onOpen={(task) => { setMobileDialogDefaults(undefined); setEdit(task); setOpen(true); }}
           onToggleDone={startCompletion}
+          renderExtras={(task) => (
+            <>
+              <div className="min-w-0 max-w-full">
+                <ListTagsCell task={task} tags={tags} />
+              </div>
+              <ListFilesCell taskId={task.id} hideEmpty />
+            </>
+          )}
           renderActions={(task) => (
             <MobileTaskActions
               task={task}

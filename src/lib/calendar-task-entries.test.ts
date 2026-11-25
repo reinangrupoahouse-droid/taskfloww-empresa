@@ -65,3 +65,15 @@ describe("calendar task entries", () => {
     ).toEqual([{ kind: "subtask", task, subtask: completed }]);
   });
 });
+
+describe("calendar day of a deadline", () => {
+  it("keeps date-only deadlines and converts timestamps to the local day", async () => {
+    const { localDayOf } = await import("./calendar-task-entries");
+    expect(localDayOf("2026-10-09")).toBe("2026-10-09");
+    expect(localDayOf(null)).toBeUndefined();
+    const noon = new Date(2026, 9, 9, 12, 0).toISOString();
+    expect(localDayOf(noon)).toBe("2026-10-09");
+    const lateEvening = new Date(2026, 9, 9, 23, 30).toISOString();
+    expect(localDayOf(lateEvening)).toBe("2026-10-09");
+  });
+});

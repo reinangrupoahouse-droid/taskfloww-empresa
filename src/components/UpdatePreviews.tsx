@@ -1881,6 +1881,37 @@ function MobileTasksPushPreview() {
   );
 }
 
+function TagFilterSavedPreview() {
+  // Ilustração estática do painel de filtros com tags marcadas. Sem ações reais.
+  const tags: Array<[string, string, boolean]> = [
+    ["Jurídico", "#5b6b8c", true],
+    ["Urgente", "#b5524f", true],
+    ["Financeiro", "#3f8a5a", false],
+    ["Marketing", "#b0811c", false],
+  ];
+  return (
+    <div role="img" aria-label="Prévia do filtro por tags que continua salvo" className="space-y-2 rounded-xl border bg-card p-3 text-[10px]">
+      <p className="font-semibold text-muted-foreground">Tags</p>
+      <div className="flex flex-wrap gap-1.5">
+        {tags.map(([name, color, active]) => (
+          <span
+            key={name}
+            data-tag-filter-preview={active ? "active" : "idle"}
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium ${active ? "border-foreground/40 bg-foreground/10" : "text-muted-foreground"}`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+            {name}
+          </span>
+        ))}
+      </div>
+      <div data-tag-filter-saved className="flex items-center gap-1.5 rounded-lg bg-muted/60 px-2 py-1.5">
+        <Check className="h-3 w-3" aria-hidden="true" />
+        Filtro salvo: Jurídico, Urgente
+      </div>
+    </div>
+  );
+}
+
 function ListTagsFilesFullTitlesPreview() {
   // Ilustração estática da Lista com título completo, tags e arquivos. Sem ações.
   const rows = [
@@ -2009,6 +2040,7 @@ function EmpresaBlackPreview() {
 }
 
 const UPDATE_PREVIEWS: Record<UpdatePreviewKind, () => ReactNode> = {
+  "tag-filter-saved": TagFilterSavedPreview,
   "list-tags-files-full-titles": ListTagsFilesFullTitlesPreview,
   "desktop-app-dock": DesktopAppDockPreview,
   "graphite-redesign-board": GraphiteRedesignBoardPreview,

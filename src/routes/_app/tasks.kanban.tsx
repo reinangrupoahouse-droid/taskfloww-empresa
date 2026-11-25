@@ -117,6 +117,7 @@ import { enqueueOfflineOperation, isOffline } from "@/lib/offline-sync";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileKanban } from "@/components/mobile/MobileKanban";
+import { usePersistentTaskFilters, useTagFilterTaskIds } from "@/hooks/use-task-filters";
 import { MobileQuickCreate, quickValuesToDialogDefaults } from "@/components/mobile/MobileQuickCreate";
 export const Route = createFileRoute("/_app/tasks/kanban")({
   component: KanbanPage,
@@ -386,11 +387,12 @@ function KanbanPage() {
   const [mobileDialogDefaults, setMobileDialogDefaults] = useState<ReturnType<typeof quickValuesToDialogDefaults> | undefined>();
   const qc = useQueryClient();
   const { user, isAdmin, isCollaborator, activeWorkspace, workspaces } = useAuth();
-  const [filters, setFilters] = useState<TaskFilterValue>(() =>
+  const [filters, setFilters, restoredFilters] = usePersistentTaskFilters(() =>
     defaultsToOwnScope(user?.id, teamVisibilityWorkspaceId, activeWorkspace?.slug)
         ? { scope: "mine" }
         : {},
   );
+  const tagTaskIds = useTagFilterTaskIds(filters.tags);
   // O filtro permite ao administrador inspecionar outro ambiente sem trocar o
   // ambiente ativo exibido no topo. Os dados auxiliares acompanham a escolha,
   // para que colunas, status e clientes sejam os do quadro visualizado.
@@ -490,7 +492,8 @@ function KanbanPage() {
     userTaskOrder.forEach((u) => m.set(u.task_id, u.position));
     return m;
   }, [userTaskOrder]);
-  const didApplyDefaultAssignee = useRef(false);
+  // Filtros salvos valem como escolha da pessoa: não reaplicar o padrão por cima.
+  const didApplyDefaultAssignee = useRef(restoredFilters);
   const [sort, setSort] = useState<{ field: SortField; direction: SortDirection }>({
     field: "due_date",
     direction: "asc",
@@ -604,6 +607,7 @@ function KanbanPage() {
       subtaskDateFilterTaskIds,
       restrictToCurrentUserParticipation: isCollaborator,
       teamVisibilityWorkspaceId,
+      tagTaskIds,
     });
     all.sort((a, b) => {
       let cmp = 0;
@@ -667,6 +671,7 @@ function KanbanPage() {
     subtaskDateFilterTaskIds,
     isCollaborator,
     teamVisibilityWorkspaceId,
+    tagTaskIds,
   ]);
 
   const completedParts = useMemo(() => {
@@ -694,9 +699,10 @@ function KanbanPage() {
         return applyTaskFilters([completedSubtaskFilterTask(parent, subtask, user.id)], { ...filters, date: "all" }, {
           userId: user.id,
           restrictToCurrentUserParticipation: isCollaborator,
+          tagTaskIds,
         }).length > 0;
       });
-  }, [tasks, allSubtasks, user?.id, collaboratorTaskIds, viewedWorkspaceId, completedRange, showAllCompleted, filters, isCollaborator, teamVisibilityWorkspaceId]);
+  }, [tasks, allSubtasks, user?.id, collaboratorTaskIds, viewedWorkspaceId, completedRange, showAllCompleted, filters, isCollaborator, teamVisibilityWorkspaceId, tagTaskIds]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -713,6 +719,7 @@ function KanbanPage() {
       subtaskDateFilterTaskIds,
       restrictToCurrentUserParticipation: isCollaborator,
       teamVisibilityWorkspaceId,
+      tagTaskIds,
     });
     return r;
   }, [
@@ -726,6 +733,7 @@ function KanbanPage() {
     subtaskDateFilterTaskIds,
     isCollaborator,
     teamVisibilityWorkspaceId,
+    tagTaskIds,
   ]);
 
   const sortedTasks = useMemo(() => {

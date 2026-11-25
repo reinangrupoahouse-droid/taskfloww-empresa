@@ -16,6 +16,8 @@ export type MobileTaskCardProps = {
   onToggleDone(): void;
   /** Menu de ações (⋯) exibido à direita, ex.: "Mover para…". */
   actions?: ReactNode;
+  /** Linha extra abaixo do título (ex.: tags e arquivos na Lista). */
+  extras?: ReactNode;
 };
 
 function dueLabel(task: Task) {
@@ -54,11 +56,12 @@ export function MobileTaskCard({
   onOpen,
   onToggleDone,
   actions,
+  extras,
 }: MobileTaskCardProps) {
   const due = dueLabel(task);
   return (
     <div
-      className={`relative flex min-w-0 items-start gap-1 overflow-hidden rounded-xl border bg-card py-1.5 pl-1 pr-1 shadow-sm ${isDone ? "opacity-70" : ""}`}
+      className={`relative flex min-w-0 flex-wrap items-start gap-1 overflow-hidden rounded-xl border bg-card py-1.5 pl-1 pr-1 shadow-sm ${isDone ? "opacity-70" : ""}`}
       aria-busy={pending || undefined}
     >
       <span
@@ -118,6 +121,9 @@ export function MobileTaskCard({
         </Avatar>
       )}
       {actions && <div className="shrink-0">{actions}</div>}
+      {extras && (
+        <div className="flex basis-full flex-wrap items-center gap-2 pb-1 pl-12 pr-2">{extras}</div>
+      )}
     </div>
   );
 }

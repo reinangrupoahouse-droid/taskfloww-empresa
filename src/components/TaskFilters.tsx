@@ -18,9 +18,10 @@ import {
   PenSquare,
   Filter as FilterIcon,
   RotateCcw,
+  Check,
 } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
-import { useAssignableProfiles, useClients, useColumns } from "@/hooks/use-data";
+import { useAssignableProfiles, useClients, useColumns, useTaskTags } from "@/hooks/use-data";
 import { useAuth } from "@/hooks/use-auth";
 
 import { dateFilterLabels, matchDateFilter, type DateFilter } from "@/lib/task-utils";
@@ -41,6 +42,8 @@ interface Filters {
   status?: string;
   /** Id do ambiente. Só aparece para quem pertence a mais de um. */
   workspace?: string;
+  /** Tags marcadas: mostra tarefas que tenham qualquer uma delas. */
+  tags?: string[];
 }
 
 const DATE_OPTIONS: DateFilter[] = [
@@ -83,6 +86,12 @@ export function TaskFilters({
   // so future client accounts are excluded automatically as well.
   const { data: assignableProfiles } = useAssignableProfiles(filters.workspace);
   const { data: columns = [] } = useColumns(filters.workspace);
+  const { data: tagOptions = [] } = useTaskTags(filters.workspace);
+  const selectedTags = filters.tags ?? [];
+  const toggleTagFilter = (id: string) => {
+    const next = selectedTags.includes(id) ? selectedTags.filter((tag) => tag !== id) : [...selectedTags, id];
+    onChange({ ...filters, tags: next.length ? next : undefined });
+  };
   const [clientsOpen, setClientsOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -137,6 +146,7 @@ export function TaskFilters({
       !!filters.priority,
       !!filters.status,
       !!filters.workspace,
+      selectedTags.length > 0,
     ].filter(Boolean).length + extraActiveChips.length;
 
   const clearAll = () => {
@@ -154,6 +164,16 @@ export function TaskFilters({
       : null,
     selectedClients.length > 0
       ? { key: "clients", label: `Cliente: ${clientsLabel}`, clear: () => setSelectedClients([]) }
+      : null,
+    selectedTags.length > 0
+      ? {
+          key: "tags",
+          label: `Tags: ${selectedTags
+            .map((id) => tagOptions.find((tag) => tag.id === id)?.name)
+            .filter(Boolean)
+            .join(", ") || `${selectedTags.length} selecionadas`}`,
+          clear: () => onChange({ ...filters, tags: undefined }),
+        }
       : null,
     !hideAssignee && filters.assignee
       ? {
@@ -466,6 +486,48 @@ export function TaskFilters({
             </div>
           </div>
 
+          <div className="mt-4 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-muted-foreground">Tags</span>
+              {selectedTags.length > 0 && (
+                <button
+                  type="button"
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                  onClick={() => onChange({ ...filters, tags: undefined })}
+                >
+                  Limpar tags
+                </button>
+              )}
+            </div>
+            {tagOptions.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Nenhuma tag criada ainda.</p>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {tagOptions.map((tag) => {
+                  const active = selectedTags.includes(tag.id);
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => toggleTagFilter(tag.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-[background-color,border-color,transform] duration-150 active:scale-95 ${
+                        active ? "border-foreground/40 bg-foreground/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      {active ? (
+                        <Check className="h-3 w-3" />
+                      ) : (
+                        <span className="h-2 w-2 rounded-full" style={{ background: tag.color }} />
+                      )}
+                      {tag.name}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {activeChips.length > 0 && (
             <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-muted/50 p-2.5">
               <span className="mr-1 text-xs font-medium">Filtros ativos:</span>
@@ -531,6 +593,7 @@ export function applyTaskFilters<
     status: string | null;
     completed_at: string | null;
     workspace_id?: string | null;
+    tag_id?: string | null;
   },
 >(
   tasks: T[],
@@ -545,8 +608,11 @@ export function applyTaskFilters<
     restrictToCurrentUserParticipation?: boolean;
     /** Team browsing is granted for this exact workspace only. */
     teamVisibilityWorkspaceId?: string | null;
+    /** Tarefas ligadas (task_tag_links) a alguma das tags do filtro. */
+    tagTaskIds?: Set<string> | null;
   },
 ) {
+  const tagFilter = f.tags && f.tags.length > 0 ? f.tags : null;
   const clientIds = f.clients && f.clients.length > 0 ? f.clients : f.client ? [f.client] : null;
   const uid = opts?.userId ?? null;
   const subIds = opts?.subtaskAssigneeTaskIds ?? null;
@@ -604,6 +670,7 @@ export function applyTaskFilters<
       }
     }
     if (f.workspace && t.workspace_id !== f.workspace) return false;
+    if (tagFilter && !(t.tag_id && tagFilter.includes(t.tag_id)) && !opts?.tagTaskIds?.has(t.id)) return false;
     if (f.priority && t.priority !== f.priority) return false;
     if (f.status === COMPLETED_STATUS_FILTER && t.status !== "done" && !t.completed_at)
       return false;

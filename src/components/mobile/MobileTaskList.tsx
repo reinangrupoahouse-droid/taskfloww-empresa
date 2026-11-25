@@ -13,6 +13,8 @@ export type MobileTaskListProps = {
   onOpen(task: Task): void;
   onToggleDone(task: Task): void;
   renderActions?(task: Task): ReactNode;
+  /** Conteúdo extra por tarefa, abaixo do título. */
+  renderExtras?(task: Task): ReactNode;
   /** Só para testes; padrão é agora. */
   now?: Date;
   /** Conteúdo extra no fim (ex.: subtarefas concluídas hoje). */
@@ -29,6 +31,7 @@ export function MobileTaskList({
   onOpen,
   onToggleDone,
   renderActions,
+  renderExtras,
   now,
   footer,
 }: MobileTaskListProps) {
@@ -68,6 +71,7 @@ export function MobileTaskList({
                   onOpen={() => onOpen(task)}
                   onToggleDone={() => onToggleDone(task)}
                   actions={renderActions?.(task)}
+                  extras={renderExtras?.(task)}
                 />
               </li>
             ))}

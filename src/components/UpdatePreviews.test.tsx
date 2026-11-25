@@ -5,6 +5,13 @@ import { APP_UPDATES } from "@/lib/app-updates";
 import { AppUpdatePreview } from "./UpdatePreviews";
 
 describe("release thumbnails", () => {
+  it("shows selected tag filters and that the filter stays saved, without real actions", () => {
+    const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "tag-filter-saved" }));
+    expect(html).toContain('data-tag-filter-preview="active"');
+    expect(html).toContain("data-tag-filter-saved");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("href=");
+  });
   it("shows full task titles, tags and files in the list without real actions", () => {
     const html = renderToStaticMarkup(createElement(AppUpdatePreview, { kind: "list-tags-files-full-titles" }));
     expect(html).toContain("data-list-files-preview");
